@@ -21,7 +21,7 @@ public class HomeNavigationFragmentPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                fragments.add(EventFragment.newInstance("Test1", "Test2"));
+                fragments.add(EventFragment.newInstance());
                 break;
 
             case 1:

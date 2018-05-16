@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".EventFragment">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        tools:context=".EventFragment">
 
-</FrameLayout>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/event_rv"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/event_fab"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_margin="12dp"
+            app:layout_anchorGravity="bottom|end"
+            android:layout_gravity="bottom|end"
+            app:srcCompat="@drawable/ic_add" />
+
+    </android.support.design.widget.CoordinatorLayout>
+</layout>
