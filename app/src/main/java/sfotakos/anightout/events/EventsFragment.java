@@ -15,6 +15,7 @@ import java.util.List;
 import sfotakos.anightout.Event;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentEventBinding;
+import sfotakos.anightout.eventdetails.EventDetailsActivity;
 import sfotakos.anightout.newevent.NewEventActivity;
 
 public class EventsFragment extends Fragment {
@@ -51,7 +52,15 @@ public class EventsFragment extends Fragment {
             eventList.add(event);
         }
 
-        mBinding.eventRv.setAdapter(new EventsRvAdapter(eventList));
+        mBinding.eventRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
+            @Override
+            public void eventClicked(Event event) {
+                Intent eventDetailsIntent = new Intent (getActivity(), EventDetailsActivity.class);
+                eventDetailsIntent.putExtra(EventDetailsActivity.EVENT_EXTRA, event);
+                eventDetailsIntent.setAction(NewEventActivity.HOME_ACTIVITY_PARENT);
+                startActivity(eventDetailsIntent);
+            }
+        }, eventList));
         mBinding.eventRv.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mBinding.eventFab.setOnClickListener(new View.OnClickListener() {

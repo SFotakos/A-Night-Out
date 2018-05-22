@@ -1,6 +1,8 @@
 package sfotakos.anightout;
 
-public class Event {
+import java.io.Serializable;
+
+public class Event implements Serializable {
 
     private String eventDate;
     private String eventName;

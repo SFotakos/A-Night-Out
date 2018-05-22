@@ -9,4 +9,5 @@
     <string name="newEvent_eventDescription_label">Event description</string>
     <string name="newEvent_save">Save</string>
     <string name="newEvent_toolbarTitle">New Event</string>
+    <string name="details_menuItem_share_title">Share</string>
 </resources>

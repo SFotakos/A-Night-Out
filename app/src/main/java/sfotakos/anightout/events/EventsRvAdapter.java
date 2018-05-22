@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import sfotakos.anightout.Event;
@@ -16,9 +15,11 @@ import sfotakos.anightout.R;
 
 public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventViewHolder> {
 
-    private List<Event> eventList = new ArrayList<>();
+    private final IEventsListener listener;
+    private List<Event> eventList;
 
-    public EventsRvAdapter(List<Event> eventList) {
+    public EventsRvAdapter(IEventsListener listener, List<Event> eventList) {
+        this.listener = listener;
         this.eventList = eventList;
     }
 
@@ -45,7 +46,7 @@ public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventV
         return eventList.size();
     }
 
-    class EventViewHolder extends RecyclerView.ViewHolder{
+    class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView mEventDate;
         TextView mEventName;
@@ -54,9 +55,19 @@ public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventV
         EventViewHolder(View itemView) {
             super(itemView);
 
+            itemView.setOnClickListener(this);
             mEventDate = itemView.findViewById(R.id.eventItem_date_tv);
             mEventName = itemView.findViewById(R.id.eventItem_name_tv);
             mEstablishmentName = itemView.findViewById(R.id.eventItem_establishment_tv);
         }
+
+        @Override
+        public void onClick(View v) {
+            listener.eventClicked(eventList.get(getAdapterPosition()));
+        }
+    }
+
+    public interface IEventsListener {
+        void eventClicked(Event event);
     }
 }
