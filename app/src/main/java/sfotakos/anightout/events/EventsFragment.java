@@ -1,5 +1,6 @@
 package sfotakos.anightout.events;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -7,7 +8,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.List;
 import sfotakos.anightout.Event;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentEventBinding;
+import sfotakos.anightout.newevent.NewEventActivity;
 
 public class EventsFragment extends Fragment {
 
@@ -56,7 +57,9 @@ public class EventsFragment extends Fragment {
         mBinding.eventFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Toast Click", Toast.LENGTH_LONG).show();
+                Intent newEventIntent = new Intent(getActivity(), NewEventActivity.class);
+                newEventIntent.setAction(NewEventActivity.HOME_ACTIVITY_PARENT);
+                startActivity(newEventIntent);
             }
         });
 

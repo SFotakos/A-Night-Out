@@ -5,6 +5,8 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="newEvent_eventName_hint">Event name</string>
+    <string name="newEvent_eventDescription_label">Event description</string>
+    <string name="newEvent_save">Save</string>
+    <string name="newEvent_toolbarTitle">New Event</string>
 </resources>

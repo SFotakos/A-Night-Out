@@ -11,4 +11,6 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+     <!--TODO unify look across the app using styles-->
+
 </resources>
