@@ -1,4 +1,4 @@
-package sfotakos.anightout;
+package sfotakos.anightout.events;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,6 +10,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import sfotakos.anightout.Event;
+import sfotakos.anightout.R;
 
 public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventViewHolder> {
 

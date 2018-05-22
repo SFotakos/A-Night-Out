@@ -1,11 +1,11 @@
-package sfotakos.anightout;
+package sfotakos.anightout.home;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 
+import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.ActivityHomeBinding;
 
 public class HomeActivity extends AppCompatActivity {

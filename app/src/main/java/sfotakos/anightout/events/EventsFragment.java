@@ -1,4 +1,4 @@
-package sfotakos.anightout;
+package sfotakos.anightout.events;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -12,18 +12,20 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import sfotakos.anightout.Event;
+import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentEventBinding;
 
-public class EventFragment extends Fragment {
+public class EventsFragment extends Fragment {
 
     private FragmentEventBinding mBinding;
 
-    public EventFragment() {
+    public EventsFragment() {
         // Required empty public constructor
     }
 
-    public static EventFragment newInstance() {
-        return new EventFragment();
+    public static EventsFragment newInstance() {
+        return new EventsFragment();
     }
 
     @Override
@@ -35,7 +37,7 @@ public class EventFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_event, container, false);
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_event, container, false);
 
         List<Event> eventList = new ArrayList<>();
 
