@@ -43,6 +43,7 @@ public class EventsFragment extends Fragment {
 
         List<Event> eventList = new ArrayList<>();
 
+        // TODO remove mock
         Event event = null;
         for (int i = 0; i < 3; i++){
             event = new Event();

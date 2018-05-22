@@ -25,6 +25,7 @@ import static sfotakos.anightout.newevent.NewEventActivity.HOME_ACTIVITY_PARENT;
 
 public class EventDetailsActivity extends AppCompatActivity {
 
+    // TODO better name
     public final static String EVENT_EXTRA = "EVENTDETAILS_EVENT";
 
     private ActivityEventDetailsBinding mBinding;
@@ -46,6 +47,7 @@ public class EventDetailsActivity extends AppCompatActivity {
             }
         }
 
+        //TODO proper nullcheck
         setSupportActionBar(mBinding.eventDetailsToolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -53,11 +55,14 @@ public class EventDetailsActivity extends AppCompatActivity {
             actionBar.setTitle(mEvent.getEventName());
         }
 
+        // TODO remove mock
         List<Uri> tempUriList = new ArrayList<>();
         tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image1"));
         tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image2"));
         tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image3"));
 
+        // TODO add snapping into position for a gallery like effect
+        // TODO add paging, something like https://stackoverflow.com/a/46084182
         mBinding.eventDetailsPhotosRv.setAdapter(new PlacePhotosRvAdapter(tempUriList));
         mBinding.eventDetailsPhotosRv.setLayoutManager(
                 new LinearLayoutManager(this,
