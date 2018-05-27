@@ -47,16 +47,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentMapBinding;
 
-import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-// TODO finish filter popup layout
-// TODO get coarse location and zoom in on that, we don't need fine location for this app
-// TODO get GPS permission and get UserLocation
-// TODO only query location and move the camera when the fragment is visible
+// TODO finish filter layout
+// TODO persist state after rotation
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback {
 
     public final static int LOCATION_PERMISSION_REQUEST_CODE = 12045;
@@ -75,6 +72,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private LatLng mClickedLatLng;
 
     private int mZoomLevel = DEFAULT_ZOOM_LEVEL;
+
+    private boolean hasZoomedIn = false;
 
     public MapFragment() {
         // Required empty public constructor
@@ -103,41 +102,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-        if (hasLocationPermission()) {
-            if (isGPSOn()) {
-                getUserLastKnownLocation();
-            }
+
+        if (getUserVisibleHint()) {
+            getUserLastKnownLocationWithChecks();
         }
-//        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-//        if (lm != null) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                lm.registerGnssStatusCallback(new GnssStatus.Callback() {
-//                    @Override
-//                    public void onStarted() {
-//                        super.onStarted();
-//                    }
-//
-//                    @Override
-//                    public void onStopped() {
-//                        super.onStopped();
-//                    }
-//                });
-//            } else {
-//                lm.addGpsStatusListener(new GpsStatus.Listener() {
-//                    @Override
-//                    public void onGpsStatusChanged(int event) {
-//                        switch(event)
-//                        {
-//                            case GPS_EVENT_STARTED:
-//
-//                                break;
-//                        }
-//                    }
-//                });
-//            }
-//        }
     }
 
     @Override
@@ -145,13 +114,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                            @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
+            // After permission was granted
             case LOCATION_PERMISSION_REQUEST_CODE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getUserLastKnownLocation();
+                    // Check if GPS is turned on
+                    requestGPS();
                 }
             }
         }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser && !hasZoomedIn) {
+            getUserLastKnownLocationWithChecks();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Return when GPS was turned on after request
+        if (requestCode == REQUEST_GPS_SETTINGS_CODE) {
+            if (resultCode == RESULT_OK) {
+                getUserLastKnownLocation();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -268,78 +258,83 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 && ActivityCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(activity,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
             return false;
         }
         return true;
     }
 
-    private boolean isGPSOn() {
+    private void requestGPS() {
         final Activity activity = getActivity();
         Context context = getContext();
 
         if (activity == null || context == null)
-            return false;
+            return;
 
-
-        LocationRequest locationRequest = LocationRequest.create();
+        final LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-        LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
+        LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest).build();
         SettingsClient client = LocationServices.getSettingsClient(context);
 
-        client.checkLocationSettings(settingsRequest).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                ApiException apiException= ((ApiException) e);
-                if (apiException.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
-                    try {
-                        // Show the dialog by calling
-                        // startResolutionForResult(), and check the
-                        // result in onActivityResult()
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        MapFragment.this.startIntentSenderForResult(resolvable.getResolution().getIntentSender(), REQUEST_GPS_SETTINGS_CODE, null, 0, 0, 0, null);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error
+        client.checkLocationSettings(settingsRequest)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        ApiException apiException = ((ApiException) e);
+                        if (apiException.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
+                            try {
+                                ResolvableApiException resolvable = (ResolvableApiException) e;
+                                MapFragment.this.startIntentSenderForResult(
+                                        resolvable.getResolution().getIntentSender(),
+                                        REQUEST_GPS_SETTINGS_CODE, null,
+                                        0, 0, 0, null);
+                            } catch (IntentSender.SendIntentException sendEx) {
+                                // Ignore this error
+                            }
+                        }
                     }
+                }).addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                if (locationSettingsResponse.getLocationSettingsStates().isLocationPresent() &&
+                        locationSettingsResponse.getLocationSettingsStates().isLocationUsable()) {
+                    getUserLastKnownLocation();
                 }
             }
         });
-
-        return false;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_GPS_SETTINGS_CODE) {
-            if (resultCode == RESULT_OK) {
-                getUserLastKnownLocation();
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @SuppressLint("MissingPermission")
     private void getUserLastKnownLocation() {
-        mFusedLocationClient
-                .getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            moveMapToUserLocation(
-                                    new LatLng(location.getLatitude(), location.getLongitude()),
-                                    false);
+        if (mFusedLocationClient != null) {
+            mFusedLocationClient
+                    .getLastLocation()
+                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null) {
+                                hasZoomedIn = true;
+                                moveMapToUserLocation(
+                                        new LatLng(location.getLatitude(), location.getLongitude()),
+                                        false);
+                            }
                         }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+        }
+    }
+
+    private void getUserLastKnownLocationWithChecks() {
+        if (hasLocationPermission()) {
+            requestGPS();
+        }
     }
 }
