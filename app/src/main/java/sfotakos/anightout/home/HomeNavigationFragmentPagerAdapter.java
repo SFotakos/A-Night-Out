@@ -9,6 +9,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import java.util.ArrayList;
 
 import sfotakos.anightout.events.EventsFragment;
+import sfotakos.anightout.map.MapFragment;
 
 public class HomeNavigationFragmentPagerAdapter extends FragmentPagerAdapter {
     private final int PAGE_COUNT = 2;
@@ -27,7 +28,7 @@ public class HomeNavigationFragmentPagerAdapter extends FragmentPagerAdapter {
                 break;
 
             case 1:
-                fragments.add(SupportMapFragment.newInstance());
+                fragments.add(MapFragment.newInstance());
                 break;
 
             default:
