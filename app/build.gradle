@@ -27,6 +27,7 @@ dependencies {
     implementation 'com.android.support:cardview-v7:27.1.1'
 
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.android.support:support-media-compat:27.1.1'
 
     implementation 'com.github.takusemba:spotlight:1.5.0'
