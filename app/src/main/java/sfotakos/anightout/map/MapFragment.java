@@ -4,16 +4,18 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,8 +23,15 @@ import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -32,10 +41,14 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentMapBinding;
+
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -46,7 +59,8 @@ import sfotakos.anightout.databinding.FragmentMapBinding;
 // TODO only query location and move the camera when the fragment is visible
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback {
 
-    public final static int LOCATION_PERMISSION_REQUEST_CODE = 12340;
+    public final static int LOCATION_PERMISSION_REQUEST_CODE = 12045;
+    public final static int REQUEST_GPS_SETTINGS_CODE = 45012;
 
     private static int ANIMATION_DURATION = 600;
     private static int DEFAULT_ZOOM_LEVEL = 15;
@@ -85,6 +99,47 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         supportMapFragment.getMapAsync(this);
     }
 
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        if (hasLocationPermission()) {
+            if (isGPSOn()) {
+                getUserLastKnownLocation();
+            }
+        }
+//        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+//        if (lm != null) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                lm.registerGnssStatusCallback(new GnssStatus.Callback() {
+//                    @Override
+//                    public void onStarted() {
+//                        super.onStarted();
+//                    }
+//
+//                    @Override
+//                    public void onStopped() {
+//                        super.onStopped();
+//                    }
+//                });
+//            } else {
+//                lm.addGpsStatusListener(new GpsStatus.Listener() {
+//                    @Override
+//                    public void onGpsStatusChanged(int event) {
+//                        switch(event)
+//                        {
+//                            case GPS_EVENT_STARTED:
+//
+//                                break;
+//                        }
+//                    }
+//                });
+//            }
+//        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
@@ -93,7 +148,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             case LOCATION_PERMISSION_REQUEST_CODE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    setupLastLocationListener();
+                    getUserLastKnownLocation();
                 }
             }
         }
@@ -103,16 +158,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
-        setupLastLocationListener();
-
         googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(final LatLng latLng) {
                 cleanMap();
 
                 mClickedLatLng = latLng;
-
                 moveMapToUserLocation(latLng, true);
             }
         });
@@ -212,7 +263,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         if (activity == null || context == null)
             return false;
 
-        if (ActivityCompat.checkSelfPermission(context,
+        if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -225,20 +276,70 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return true;
     }
 
-    @SuppressLint("MissingPermission")
-    private void setupLastLocationListener() {
-        if (hasLocationPermission()) {
-            mFusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                moveMapToUserLocation(
-                                        new LatLng(location.getLatitude(), location.getLongitude()),
-                                        false);
-                            }
-                        }
-                    });
+    private boolean isGPSOn() {
+        final Activity activity = getActivity();
+        Context context = getContext();
+
+        if (activity == null || context == null)
+            return false;
+
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
+        SettingsClient client = LocationServices.getSettingsClient(context);
+
+        client.checkLocationSettings(settingsRequest).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                ApiException apiException= ((ApiException) e);
+                if (apiException.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
+                    try {
+                        // Show the dialog by calling
+                        // startResolutionForResult(), and check the
+                        // result in onActivityResult()
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        MapFragment.this.startIntentSenderForResult(resolvable.getResolution().getIntentSender(), REQUEST_GPS_SETTINGS_CODE, null, 0, 0, 0, null);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        // Ignore the error
+                    }
+                }
+            }
+        });
+
+        return false;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_GPS_SETTINGS_CODE) {
+            if (resultCode == RESULT_OK) {
+                getUserLastKnownLocation();
+            }
         }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getUserLastKnownLocation() {
+        mFusedLocationClient
+                .getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            moveMapToUserLocation(
+                                    new LatLng(location.getLatitude(), location.getLongitude()),
+                                    false);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 }
