@@ -2,23 +2,19 @@ package sfotakos.anightout.map;
 
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -28,7 +24,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentMapBinding;
-import sfotakos.anightout.databinding.MapFilterBinding;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,7 +34,7 @@ import sfotakos.anightout.databinding.MapFilterBinding;
 // TODO only query location and move the camera when the fragment is visible
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback {
 
-    private static int ANIMATION_DURATION = 800;
+    private static int ANIMATION_DURATION = 600;
     private static int DEFAULT_ZOOM_LEVEL = 15;
 
     private FragmentMapBinding mBinding;
@@ -70,7 +65,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onResume() {
         super.onResume();
 
-        // TODO find out why dataBinding is ignoring <fragment tags>
         SupportMapFragment supportMapFragment =
                 ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
         supportMapFragment.getMapAsync(this);
@@ -100,54 +94,37 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 .position(mClickedLatLng)
                 .draggable(false));
 
-        Projection projection = mGoogleMap.getProjection();
-        Point markerScreenPosition = projection.toScreenLocation(mCenterMarker.getPosition());
-
-        showFilterPopup(markerScreenPosition.x, markerScreenPosition.y);
+        showFilter();
     }
 
     @Override
     public void onCancel() {
-
     }
 
-    private void showFilterPopup(int xPos, int yPos) {
-        MapFilterBinding filterBinding =
-                DataBindingUtil.inflate(getLayoutInflater(),
-                        R.layout.map_filter, null, false);
+    private void showFilter() {
+        mBinding.mapFilter.getRoot().setVisibility(View.VISIBLE);
 
-        PopupWindow filterPopup =
-                new PopupWindow(filterBinding.getRoot(),
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT, true);
-        filterPopup.setOutsideTouchable(false);
-
-        filterPopup.setOnDismissListener(new PopupWindow.OnDismissListener() {
+        //TODO persist filterOptions and reapply them on marker change
+        mBinding.mapFilter.filterSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDismiss() {
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "Search", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mBinding.mapFilter.filterCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBinding.mapFilter.getRoot().setVisibility(View.GONE);
                 cleanMap();
+                resetFilterOptions();
             }
         });
 
-        filterPopup.showAsDropDown(mBinding.getRoot(), xPos, yPos, Gravity.NO_GRAVITY);
-
-        filterBinding.filterOkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), "OK", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        filterBinding.filterCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), "CANCEL", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        filterBinding.filterDistanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mBinding.mapFilter.filterDistanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.d("MyMapFragment", "Progress: " + progress);
                 safeRemoveCircle();
                 mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
                         .center(mCenterMarker.getPosition())
@@ -168,6 +145,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         });
     }
 
+    private void resetFilterOptions(){
+        mBinding.mapFilter.filterDistanceSeekBar.setProgress(0);
+    }
+
     private void safeRemoveMarker() {
         if (mCenterMarker != null) {
             mCenterMarker.remove();
@@ -184,5 +165,4 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         safeRemoveMarker();
         safeRemoveCircle();
     }
-
 }
