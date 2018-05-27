@@ -26,7 +26,9 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -65,6 +67,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private FragmentMapBinding mBinding;
 
     private FusedLocationProviderClient mFusedLocationClient;
+    private LocationCallback mLocationCallback;
 
     private GoogleMap mGoogleMap;
     private Marker mCenterMarker;
@@ -74,6 +77,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private int mZoomLevel = DEFAULT_ZOOM_LEVEL;
 
     private boolean hasZoomedIn = false;
+    private boolean isRequestLocationUpdatesActive = false;
 
     public MapFragment() {
         // Required empty public constructor
@@ -138,7 +142,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         // Return when GPS was turned on after request
         if (requestCode == REQUEST_GPS_SETTINGS_CODE) {
             if (resultCode == RESULT_OK) {
-                getUserLastKnownLocation();
+                setRequestLocationUpdates();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -301,34 +305,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 if (locationSettingsResponse.getLocationSettingsStates().isLocationPresent() &&
                         locationSettingsResponse.getLocationSettingsStates().isLocationUsable()) {
-                    getUserLastKnownLocation();
+                    setRequestLocationUpdates();
                 }
             }
         });
     }
 
     @SuppressLint("MissingPermission")
-    private void getUserLastKnownLocation() {
-        if (mFusedLocationClient != null) {
-            mFusedLocationClient
-                    .getLastLocation()
-                    .addOnSuccessListener(new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                hasZoomedIn = true;
-                                moveMapToUserLocation(
-                                        new LatLng(location.getLatitude(), location.getLongitude()),
-                                        false);
-                            }
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
+    private void setRequestLocationUpdates() {
+        if (mFusedLocationClient != null && !isRequestLocationUpdatesActive) {
+            mLocationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult result) {
+                    Location location = result.getLastLocation();
+                    if (location != null) {
+                        hasZoomedIn = true;
+                        moveMapToUserLocation(
+                                new LatLng(location.getLatitude(), location.getLongitude()),
+                                false);
+                        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+                        isRequestLocationUpdatesActive = false;
+                    }
+                }
+            };
+            LocationRequest locationRequest = LocationRequest.create()
+                    .setInterval(1000).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            isRequestLocationUpdatesActive = true;
+            mFusedLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, null);
         }
     }
 
