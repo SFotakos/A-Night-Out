@@ -43,10 +43,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:max="800"
-            android:min="50"
             android:minWidth="100dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:maxWidth="250dp"
+            app:layout_constraintEnd_toStartOf="@+id/filter_distance_textView"
             app:layout_constraintStart_toEndOf="@+id/filter_distance_imageView"
+            app:layout_constraintTop_toTopOf="@+id/filter_distance_imageView" />
+
+        <TextView
+            android:id="@+id/filter_distance_textView"
+            android:textColor="@android:color/white"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/filter_distance_seekBar"
             app:layout_constraintTop_toTopOf="@+id/filter_distance_imageView" />
 
         <android.support.v7.widget.AppCompatImageView

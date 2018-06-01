@@ -73,6 +73,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private static int ANIMATION_DURATION = 600;
     private static int DEFAULT_ZOOM_LEVEL = 15;
+    private static int MIN_SEARCH_RADIUS = 50; // This is a workaround so SeekBar has a min value
 
     private FragmentMapBinding mBinding;
 
@@ -112,6 +113,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         SupportMapFragment supportMapFragment =
                 ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
         supportMapFragment.getMapAsync(this);
+
+        setupFragment();
     }
 
     @SuppressLint("MissingPermission")
@@ -191,7 +194,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mCenterMarker = mGoogleMap.addMarker(new MarkerOptions()
                 .position(mClickedLatLng)
                 .draggable(false));
-
+        setSearchCircle(MIN_SEARCH_RADIUS);
         showFilter();
     }
 
@@ -243,21 +246,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mBinding.mapFilter.filterCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBinding.mapFilter.getRoot().setVisibility(View.GONE);
                 cleanMap();
                 resetFilterOptions();
+                mBinding.mapFilter.getRoot().setVisibility(View.GONE);
             }
         });
 
         mBinding.mapFilter.filterDistanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int progressWithOffset = progress + MIN_SEARCH_RADIUS;
+                mBinding.mapFilter.filterDistanceTextView.setText(progressWithOffset + " m");
                 safeRemoveCircle();
-                mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
-                        .center(mCenterMarker.getPosition())
-                        .radius(progress)
-                        .strokeColor(Color.DKGRAY)
-                        .fillColor(Color.TRANSPARENT));
+                setSearchCircle(progressWithOffset);
             }
 
             @Override
@@ -411,10 +412,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         Call<GooglePlacesResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
                 getResources().getString(R.string.google_places_key),
                 mClickedLatLng.latitude + "," + mClickedLatLng.longitude,
-                Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress()),
+                Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress()) + MIN_SEARCH_RADIUS,
                 "restaurant");
         placesCall.enqueue(this);
     }
 
+    private void setupFragment() {
+        mBinding.mapFilter.filterDistanceTextView.setText(MIN_SEARCH_RADIUS + " m");
+    }
+
+    private void setSearchCircle(int progress){
+        mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
+                .center(mCenterMarker.getPosition())
+                .radius(progress)
+                .strokeColor(Color.DKGRAY)
+                .fillColor(Color.TRANSPARENT));
+    }
 
 }
