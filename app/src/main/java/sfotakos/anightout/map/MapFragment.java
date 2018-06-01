@@ -21,7 +21,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -46,6 +45,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import sfotakos.anightout.GooglePlacesResponse;
+import sfotakos.anightout.NetworkUtil;
+import sfotakos.anightout.Place;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentMapBinding;
 
@@ -183,7 +190,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mBinding.mapFilter.filterSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Search", Toast.LENGTH_SHORT).show();
+                Call<GooglePlacesResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
+                        getResources().getString(R.string.google_places_key),
+                        mClickedLatLng.latitude + "," + mClickedLatLng.longitude,
+                        Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress()));
+                placesCall.enqueue(new Callback<GooglePlacesResponse>() {
+                    @Override
+                    public void onResponse(Call<GooglePlacesResponse> call, Response<GooglePlacesResponse> response) {
+                            GooglePlacesResponse placesResponse = response.body();
+                            List<Place> places = placesResponse.getResults();
+                            for (Place place : places){
+                                LatLng placeLatLng = new LatLng(place.getGeometry().getLocation().getLat(),
+                                        place.getGeometry().getLocation().getLng());
+                                mGoogleMap.addMarker(new MarkerOptions()
+                                        .position(placeLatLng)
+                                        .draggable(false));
+                            }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GooglePlacesResponse> call, Throwable t) {
+                        t.printStackTrace();
+                    }
+                });
             }
         });
 
