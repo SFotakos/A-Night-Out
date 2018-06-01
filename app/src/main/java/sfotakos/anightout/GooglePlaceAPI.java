@@ -10,6 +10,7 @@ public interface GooglePlaceAPI {
     Call<GooglePlacesResponse> getPlaces(
             @Query("key") String apiKey,
             @Query("location") String location,
-            @Query("radius") String radius);
+            @Query("radius") String radius,
+            @Query("type") String type);
 
 }

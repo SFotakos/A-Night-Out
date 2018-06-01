@@ -16,7 +16,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,19 +36,23 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import sfotakos.anightout.DrawableUtils;
 import sfotakos.anightout.GooglePlacesResponse;
 import sfotakos.anightout.NetworkUtil;
 import sfotakos.anightout.Place;
@@ -63,7 +66,7 @@ import static android.app.Activity.RESULT_OK;
  */
 // TODO finish filter layout
 // TODO persist state after rotation
-public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback {
+public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback, Callback<GooglePlacesResponse> {
 
     public final static int LOCATION_PERMISSION_REQUEST_CODE = 12045;
     public final static int REQUEST_GPS_SETTINGS_CODE = 45012;
@@ -85,6 +88,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private boolean hasZoomedIn = false;
     private boolean isRequestLocationUpdatesActive = false;
+
+    private List<Marker> searchedPlacesMarker = new ArrayList<>();
 
     public MapFragment() {
         // Required empty public constructor
@@ -121,6 +126,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser && !hasZoomedIn) {
+            getUserLastKnownLocationWithChecks();
+        }
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
@@ -133,14 +146,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     requestGPS();
                 }
             }
-        }
-    }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser && !hasZoomedIn) {
-            getUserLastKnownLocationWithChecks();
         }
     }
 
@@ -158,6 +163,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
+        mGoogleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(
+                getContext(), R.raw.maps_style_json));
 
         googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
@@ -168,8 +175,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 moveMapToUserLocation(latLng, true);
             }
         });
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                return true;
+            }
+        });
     }
 
+    //region cameraAnimationCallback
     @Override
     public void onFinish() {
         mCenterMarker = mGoogleMap.addMarker(new MarkerOptions()
@@ -182,39 +198,47 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onCancel() {
     }
+    //endregion
+
+    //region retrofitCallResponse
+    @Override
+    public void onResponse(@NonNull Call<GooglePlacesResponse> call, @NonNull Response<GooglePlacesResponse> response) {
+        GooglePlacesResponse placesResponse = response.body();
+        if (placesResponse != null) {
+            List<Place> places = placesResponse.getResults();
+            for (final Place place : places) {
+                LatLng placeLatLng = new LatLng(place.getGeometry().getLocation().getLat(),
+                        place.getGeometry().getLocation().getLng());
+
+                MarkerOptions placeMarketOptions = new MarkerOptions()
+                        .position(placeLatLng)
+                        .icon(BitmapDescriptorFactory.fromBitmap(
+                                DrawableUtils.getBitmapFromVectorDrawable(
+                                        getContext(), R.drawable.ic_store)))
+                        .draggable(false);
+
+                searchedPlacesMarker.add(mGoogleMap.addMarker(placeMarketOptions));
+            }
+        }
+    }
+
+    @Override
+    public void onFailure(@NonNull Call<GooglePlacesResponse> call, @NonNull Throwable t) {
+        t.printStackTrace();
+    }
+    //endregion
 
     private void showFilter() {
         mBinding.mapFilter.getRoot().setVisibility(View.VISIBLE);
 
         //TODO persist filterOptions and reapply them on marker change
-        mBinding.mapFilter.filterSearchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Call<GooglePlacesResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
-                        getResources().getString(R.string.google_places_key),
-                        mClickedLatLng.latitude + "," + mClickedLatLng.longitude,
-                        Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress()));
-                placesCall.enqueue(new Callback<GooglePlacesResponse>() {
+        mBinding.mapFilter.filterSearchButton.setOnClickListener(
+                new View.OnClickListener() {
                     @Override
-                    public void onResponse(Call<GooglePlacesResponse> call, Response<GooglePlacesResponse> response) {
-                            GooglePlacesResponse placesResponse = response.body();
-                            List<Place> places = placesResponse.getResults();
-                            for (Place place : places){
-                                LatLng placeLatLng = new LatLng(place.getGeometry().getLocation().getLat(),
-                                        place.getGeometry().getLocation().getLng());
-                                mGoogleMap.addMarker(new MarkerOptions()
-                                        .position(placeLatLng)
-                                        .draggable(false));
-                            }
-                    }
-
-                    @Override
-                    public void onFailure(Call<GooglePlacesResponse> call, Throwable t) {
-                        t.printStackTrace();
+                    public void onClick(View v) {
+                        requestPlacesFromAPI();
                     }
                 });
-            }
-        });
 
         mBinding.mapFilter.filterCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -228,7 +252,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mBinding.mapFilter.filterDistanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.d("MyMapFragment", "Progress: " + progress);
                 safeRemoveCircle();
                 mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
                         .center(mCenterMarker.getPosition())
@@ -262,6 +285,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void safeRemoveCircle() {
         if (mSearchCircle != null) {
             mSearchCircle.remove();
+        }
+    }
+
+    private void clearPlacesMarkers() {
+        if (searchedPlacesMarker != null) {
+            for (Marker placeMarker : searchedPlacesMarker) {
+                placeMarker.remove();
+            }
+            searchedPlacesMarker.clear();
         }
     }
 
@@ -329,15 +361,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             }
                         }
                     }
-                }).addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                if (locationSettingsResponse.getLocationSettingsStates().isLocationPresent() &&
-                        locationSettingsResponse.getLocationSettingsStates().isLocationUsable()) {
-                    setRequestLocationUpdates();
-                }
-            }
-        });
+                })
+                .addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
+                    @Override
+                    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                        if (locationSettingsResponse.getLocationSettingsStates().isLocationPresent() &&
+                                locationSettingsResponse.getLocationSettingsStates().isLocationUsable()) {
+                            setRequestLocationUpdates();
+                        }
+                    }
+                });
     }
 
     @SuppressLint("MissingPermission")
@@ -370,4 +403,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             requestGPS();
         }
     }
+
+    //TODO improve how this call is made
+    //TODO create a class to handle these requests
+    private void requestPlacesFromAPI() {
+        clearPlacesMarkers();
+        Call<GooglePlacesResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
+                getResources().getString(R.string.google_places_key),
+                mClickedLatLng.latitude + "," + mClickedLatLng.longitude,
+                Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress()),
+                "restaurant");
+        placesCall.enqueue(this);
+    }
+
+
 }
