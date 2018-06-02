@@ -311,6 +311,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void cleanMap() {
         safeRemoveMarker();
         safeRemoveCircle();
+        clearPlacesMarkers();
     }
 
     private void moveMapToUserLocation(LatLng latLng, boolean shouldUseCallback) {
