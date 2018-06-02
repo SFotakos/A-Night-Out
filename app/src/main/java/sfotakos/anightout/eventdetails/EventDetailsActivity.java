@@ -63,8 +63,8 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         // TODO add snapping into position for a gallery like effect
         // TODO add paging, something like https://stackoverflow.com/a/46084182
-        mBinding.eventDetailsPhotosRv.setAdapter(new PlacePhotosRvAdapter(tempUriList));
-        mBinding.eventDetailsPhotosRv.setLayoutManager(
+        mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(tempUriList));
+        mBinding.placeDetails.placePhotosRv.setLayoutManager(
                 new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false));
 

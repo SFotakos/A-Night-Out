@@ -1,56 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".eventdetails.EventDetailsActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO remove mock -->
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/eventDetails_toolbar"
-            style="@style/ThemeOverlay.AppCompat.Light"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark" />
-
-        <include
-            android:id="@+id/placeDetails"
-            layout="@layout/layout_place_details"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/placePhotos_rv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="150dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/eventDetails_toolbar" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/eventDetails_dateTime_textView"
+            android:id="@+id/placeName_textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
-            android:text="22/05/2018 14:00"
+            android:text="MyPlace"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/placeDetails" />
+            app:layout_constraintTop_toBottomOf="@+id/placePhotos_rv" />
 
         <TextView
-            android:id="@+id/eventDetails_description_textView"
+            android:id="@+id/placePrice_textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
-            android:text="MyPlace is a fantastic place!"
+            android:text="Expensive"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/eventDetails_dateTime_textView" />
+            app:layout_constraintTop_toBottomOf="@+id/placeName_textView" />
 
+        <TextView
+            android:id="@+id/placeAddress_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:text="Street FarAway, 230"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/placePrice_textView" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>
