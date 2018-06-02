@@ -269,8 +269,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mBinding.mapFilter.filterCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cleanMap();
                 resetFilterOptions();
+                cleanMap();
                 mBinding.mapFilter.getRoot().setVisibility(View.GONE);
             }
         });
