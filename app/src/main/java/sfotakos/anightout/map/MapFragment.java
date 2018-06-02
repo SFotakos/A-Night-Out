@@ -9,6 +9,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,6 +20,8 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
 import com.google.android.gms.common.api.ApiException;
@@ -54,10 +57,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import sfotakos.anightout.DrawableUtils;
 import sfotakos.anightout.GooglePlacesResponse;
+import sfotakos.anightout.IconAndTextAdapter;
 import sfotakos.anightout.NetworkUtil;
 import sfotakos.anightout.Place;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentMapBinding;
+import sfotakos.anightout.newevent.GooglePlacesRequestParams;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -73,7 +78,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private static int ANIMATION_DURATION = 600;
     private static int DEFAULT_ZOOM_LEVEL = 15;
-    private static int MIN_SEARCH_RADIUS = 50; // This is a workaround so SeekBar has a min value
+    private static int MIN_SEARCH_RADIUS = 100; // This is a workaround so SeekBar has a min value
 
     private FragmentMapBinding mBinding;
 
@@ -88,9 +93,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private int mZoomLevel = DEFAULT_ZOOM_LEVEL;
 
     private boolean hasZoomedIn = false;
-    private boolean isRequestLocationUpdatesActive = false;
+    private boolean isRequestLocationUpdatesActive = false; //This ensures only one listener is set to receive location update at a time
 
     private List<Marker> searchedPlacesMarker = new ArrayList<>();
+    private GooglePlacesRequestParams mPlacesRequest = new GooglePlacesRequestParams();
+
+    private boolean isPriceFilteringEnabled = true;
 
     public MapFragment() {
         // Required empty public constructor
@@ -206,6 +214,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     //region retrofitCallResponse
     @Override
     public void onResponse(@NonNull Call<GooglePlacesResponse> call, @NonNull Response<GooglePlacesResponse> response) {
+        canUseFilterActions(true);
         GooglePlacesResponse placesResponse = response.body();
         if (placesResponse != null) {
             List<Place> places = placesResponse.getResults();
@@ -227,6 +236,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     @Override
     public void onFailure(@NonNull Call<GooglePlacesResponse> call, @NonNull Throwable t) {
+        canUseFilterActions(true);
         t.printStackTrace();
     }
     //endregion
@@ -409,24 +419,99 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     //TODO create a class to handle these requests
     private void requestPlacesFromAPI() {
         clearPlacesMarkers();
+        canUseFilterActions(false);
         Call<GooglePlacesResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
                 getResources().getString(R.string.google_places_key),
                 mClickedLatLng.latitude + "," + mClickedLatLng.longitude,
-                Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress()) + MIN_SEARCH_RADIUS,
-                "restaurant");
+                Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress() + MIN_SEARCH_RADIUS),
+                mPlacesRequest.getType(),
+                isPriceFilteringEnabled ? mPlacesRequest.getPrice() : null);
         placesCall.enqueue(this);
     }
 
     private void setupFragment() {
         mBinding.mapFilter.filterDistanceTextView.setText(MIN_SEARCH_RADIUS + " m");
+
+        List<Integer> iconResList = new ArrayList<>();
+        final List<String> placeDescriptionList = new ArrayList<>();
+
+        for (GooglePlacesRequestParams.PlaceType placeType : GooglePlacesRequestParams.PlaceType.values()) {
+            iconResList.add(placeType.getIconResId());
+            placeDescriptionList.add(placeType.getDescription());
+        }
+
+        IconAndTextAdapter placeIconAndTextAdapter =
+                new IconAndTextAdapter(
+                        getContext(),
+                        R.layout.spinner_icon_and_text,
+                        placeDescriptionList,
+                        iconResList);
+
+        mBinding.mapFilter.filterPlaceSpinner.setAdapter(placeIconAndTextAdapter);
+        mBinding.mapFilter.filterPlaceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
+                mPlacesRequest.setType(GooglePlacesRequestParams.PlaceType.values()[position].getTag());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView adapterView) {
+
+            }
+        });
+
+        final List<String> priceDescriptionList = new ArrayList<>();
+
+        for (GooglePlacesRequestParams.PlacePrice placePrice : GooglePlacesRequestParams.PlacePrice.values()) {
+            priceDescriptionList.add(placePrice.getDescription());
+        }
+
+        IconAndTextAdapter priceIconAndTextAdapter =
+                new IconAndTextAdapter(
+                        getContext(),
+                        R.layout.spinner_icon_and_text,
+                        priceDescriptionList);
+
+        mBinding.mapFilter.filterPriceRangeSpinner.setAdapter(priceIconAndTextAdapter);
+        mBinding.mapFilter.filterPriceRangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
+                mPlacesRequest.setPrice(GooglePlacesRequestParams.PlacePrice.values()[position].getTag());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView adapterView) {
+
+            }
+        });
+
+        mBinding.mapFilter.filterPriceRangeCheckBox.setChecked(isPriceFilteringEnabled);
+        mBinding.mapFilter.filterPriceRangeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isPriceFilteringEnabled = isChecked;
+                mBinding.mapFilter.filterPriceRangeSpinner.setEnabled(isChecked);
+                mBinding.mapFilter.filterPriceRangeSpinner.getSelectedView().setEnabled(isChecked);
+                mBinding.mapFilter.filterPriceRangeImageView.setColorFilter(isChecked ?
+                                getResources().getColor(android.R.color.white) :
+                                getResources().getColor(android.R.color.darker_gray),
+                        PorterDuff.Mode.SRC_ATOP);
+            }
+        });
+
     }
 
-    private void setSearchCircle(int progress){
+    private void setSearchCircle(int progress) {
         mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
                 .center(mCenterMarker.getPosition())
                 .radius(progress)
                 .strokeColor(Color.DKGRAY)
                 .fillColor(Color.TRANSPARENT));
+    }
+
+    private void canUseFilterActions(boolean enabled) {
+        mBinding.mapFilter.filterSearchButton.setEnabled(enabled);
+        mBinding.mapFilter.filterCancelButton.setEnabled(enabled);
     }
 
 }

@@ -11,6 +11,7 @@ public interface GooglePlaceAPI {
             @Query("key") String apiKey,
             @Query("location") String location,
             @Query("radius") String radius,
-            @Query("type") String type);
+            @Query("type") String type,
+            @Query("maxprice") String maxPrice);
 
 }
