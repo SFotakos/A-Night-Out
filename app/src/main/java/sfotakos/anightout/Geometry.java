@@ -1,6 +1,8 @@
 package sfotakos.anightout;
 
-public class Geometry {
+import java.io.Serializable;
+
+public class Geometry implements Serializable{
 
     private Location location;
 

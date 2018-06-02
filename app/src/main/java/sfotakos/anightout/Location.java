@@ -1,6 +1,8 @@
 package sfotakos.anightout;
 
-public class Location {
+import java.io.Serializable;
+
+public class Location implements Serializable{
 
     private Double lat;
     private Double lng;

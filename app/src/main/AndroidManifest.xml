@@ -9,6 +9,7 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <!-- TODO remove portrait restriction -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -22,15 +23,29 @@
 
         <activity
             android:name=".home.HomeActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".newevent.NewEventActivity" />
-        <activity android:name=".eventdetails.EventDetailsActivity"></activity>
+        <activity
+            android:name=".newevent.NewEventActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".eventdetails.EventDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".place.PlaceDetailsActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".home.HomeActivity" />
+
+        </activity>
     </application>
 
 </manifest>

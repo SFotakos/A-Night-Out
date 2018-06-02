@@ -50,6 +50,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -63,6 +64,7 @@ import sfotakos.anightout.Place;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentMapBinding;
 import sfotakos.anightout.newevent.GooglePlacesRequestParams;
+import sfotakos.anightout.place.PlaceDetailsActivity;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -96,6 +98,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private boolean isRequestLocationUpdatesActive = false; //This ensures only one listener is set to receive location update at a time
 
     private List<Marker> searchedPlacesMarker = new ArrayList<>();
+    private HashMap<String, Place> searchedPlaces = new HashMap<>();
     private GooglePlacesRequestParams mPlacesRequest = new GooglePlacesRequestParams();
 
     private boolean isPriceFilteringEnabled = true;
@@ -190,7 +193,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-
+                Place place = null;
+                if (searchedPlaces != null) {
+                    place = searchedPlaces.get(marker.getId());
+                    if (place != null) {
+                        Intent placeDetailsIntent = new Intent(getActivity(), PlaceDetailsActivity.class);
+                        placeDetailsIntent.putExtra(PlaceDetailsActivity.PLACE_EXTRA, place);
+                        startActivity(placeDetailsIntent);
+                    }
+                }
                 return true;
             }
         });
@@ -229,7 +240,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                         getContext(), R.drawable.ic_store)))
                         .draggable(false);
 
-                searchedPlacesMarker.add(mGoogleMap.addMarker(placeMarketOptions));
+                Marker placeMarker = mGoogleMap.addMarker(placeMarketOptions);
+                searchedPlacesMarker.add(placeMarker);
+                searchedPlaces.put(placeMarker.getId(), place);
             }
         }
     }
@@ -299,19 +312,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    private void clearPlacesMarkers() {
+    private void clearSearchedPlaces() {
         if (searchedPlacesMarker != null) {
             for (Marker placeMarker : searchedPlacesMarker) {
                 placeMarker.remove();
             }
             searchedPlacesMarker.clear();
         }
+
+        if (searchedPlaces != null) {
+            searchedPlaces.clear();
+        }
     }
 
     private void cleanMap() {
         safeRemoveMarker();
         safeRemoveCircle();
-        clearPlacesMarkers();
+        clearSearchedPlaces();
     }
 
     private void moveMapToUserLocation(LatLng latLng, boolean shouldUseCallback) {
@@ -419,7 +436,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     //TODO improve how this call is made
     //TODO create a class to handle these requests
     private void requestPlacesFromAPI() {
-        clearPlacesMarkers();
+        clearSearchedPlaces();
         canUseFilterActions(false);
         Call<GooglePlacesResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
                 getResources().getString(R.string.google_places_key),

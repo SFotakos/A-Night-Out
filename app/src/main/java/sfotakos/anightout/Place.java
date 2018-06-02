@@ -1,8 +1,9 @@
 package sfotakos.anightout;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Place {
+public class Place implements Serializable {
 
     private Geometry geometry;
     private String icon;
