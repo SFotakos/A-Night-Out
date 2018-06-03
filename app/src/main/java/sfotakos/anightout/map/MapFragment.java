@@ -223,7 +223,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 .position(mClickedLatLng)
                 .icon(bitmapDescriptor)
                 .draggable(false));
-        setSearchCircle(MIN_SEARCH_RADIUS);
+
+        int seekbarProgress = 0;
+        try {
+            seekbarProgress = mBinding.mapFilter.filterDistanceSeekBar.getProgress();
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        setSearchCircle(MIN_SEARCH_RADIUS + seekbarProgress);
         showFilter();
     }
 
