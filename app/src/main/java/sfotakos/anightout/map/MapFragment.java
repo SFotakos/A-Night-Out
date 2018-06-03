@@ -136,7 +136,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         super.onAttach(context);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
-        if (getUserVisibleHint()) {
+        if (getUserVisibleHint() && !hasZoomedIn) {
             getUserLastKnownLocationWithChecks();
         }
     }
@@ -343,7 +343,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private void moveMapToUserLocation(LatLng latLng, boolean shouldUseCallback) {
         GoogleMap.CancelableCallback callback = shouldUseCallback ? MapFragment.this : null;
-        if (latLng != null) {
+        if (latLng != null && mGoogleMap != null) {
             mGoogleMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(latLng, mZoomLevel),
                     ANIMATION_DURATION, callback);
