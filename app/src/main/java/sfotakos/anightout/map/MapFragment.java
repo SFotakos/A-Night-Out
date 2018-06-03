@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.location.Location;
@@ -39,6 +40,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -210,8 +212,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     //region cameraAnimationCallback
     @Override
     public void onFinish() {
+        Bitmap markerBitmap = DrawableUtils.getBitmapFromVectorDrawable(
+                getContext(), R.drawable.ic_pin);
+        Bitmap tintedMarkerBitmap = DrawableUtils.tintImage(markerBitmap,
+                ContextCompat.getColor(getContext(), R.color.colorPrimary));
+
+        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(tintedMarkerBitmap);
+
         mCenterMarker = mGoogleMap.addMarker(new MarkerOptions()
                 .position(mClickedLatLng)
+                .icon(bitmapDescriptor)
                 .draggable(false));
         setSearchCircle(MIN_SEARCH_RADIUS);
         showFilter();
@@ -523,7 +533,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
                 .center(mCenterMarker.getPosition())
                 .radius(progress)
-                .strokeColor(Color.DKGRAY)
+                .strokeColor(ContextCompat.getColor(getContext(), R.color.colorAccent))
                 .fillColor(Color.TRANSPARENT));
     }
 
