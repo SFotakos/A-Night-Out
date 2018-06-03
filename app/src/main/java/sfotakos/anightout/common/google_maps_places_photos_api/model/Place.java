@@ -1,19 +1,51 @@
-package sfotakos.anightout;
+package sfotakos.anightout.common.google_maps_places_photos_api.model;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.List;
 
 public class Place implements Serializable {
 
+    @SerializedName("geometry")
+    @Expose
     private Geometry geometry;
+    @SerializedName("icon")
+    @Expose
     private String icon;
+    @SerializedName("id")
+    @Expose
     private String id;
+    @SerializedName("name")
+    @Expose
     private String name;
+    @SerializedName("opening_hours")
+    @Expose
+    private OpeningHours openingHours;
+    @SerializedName("photos")
+    @Expose
+    private List<Photo> photos = null;
+    @SerializedName("place_id")
+    @Expose
     private String placeId;
+    @SerializedName("price_level")
+    @Expose
+    private Integer priceLevel;
+    @SerializedName("rating")
+    @Expose
     private Double rating;
+    @SerializedName("reference")
+    @Expose
     private String reference;
+    @SerializedName("scope")
+    @Expose
     private String scope;
+    @SerializedName("types")
+    @Expose
     private List<String> types = null;
+    @SerializedName("vicinity")
+    @Expose
     private String vicinity;
 
     public Geometry getGeometry() {
@@ -48,12 +80,36 @@ public class Place implements Serializable {
         this.name = name;
     }
 
+    public OpeningHours getOpeningHours() {
+        return openingHours;
+    }
+
+    public void setOpeningHours(OpeningHours openingHours) {
+        this.openingHours = openingHours;
+    }
+
+    public List<Photo> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<Photo> photos) {
+        this.photos = photos;
+    }
+
     public String getPlaceId() {
         return placeId;
     }
 
     public void setPlaceId(String placeId) {
         this.placeId = placeId;
+    }
+
+    public Integer getPriceLevel() {
+        return priceLevel;
+    }
+
+    public void setPriceLevel(Integer priceLevel) {
+        this.priceLevel = priceLevel;
     }
 
     public Double getRating() {
@@ -95,5 +151,4 @@ public class Place implements Serializable {
     public void setVicinity(String vicinity) {
         this.vicinity = vicinity;
     }
-
 }

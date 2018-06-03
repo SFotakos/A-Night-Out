@@ -1,4 +1,4 @@
-package sfotakos.anightout;
+package sfotakos.anightout.common;
 
 import android.content.Context;
 import android.graphics.Bitmap;

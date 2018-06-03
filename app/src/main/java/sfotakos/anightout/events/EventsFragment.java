@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import sfotakos.anightout.Event;
+import sfotakos.anightout.common.Event;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentEventBinding;
 import sfotakos.anightout.eventdetails.EventDetailsActivity;

@@ -14,7 +14,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import sfotakos.anightout.Place;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
 import sfotakos.anightout.eventdetails.PlacePhotosRvAdapter;

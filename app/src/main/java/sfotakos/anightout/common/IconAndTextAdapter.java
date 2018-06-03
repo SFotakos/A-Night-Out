@@ -1,4 +1,4 @@
-package sfotakos.anightout;
+package sfotakos.anightout.common;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
+
+import sfotakos.anightout.R;
 
 // Well done tutorial https://www.codingdemos.com/android-custom-spinner-images-text/
 // TODO change spinner icon as seen on https://stackoverflow.com/a/37461505/5075144
@@ -74,7 +76,7 @@ public class IconAndTextAdapter extends ArrayAdapter<String> {
         holder.root.setBackgroundColor(backgroundColorId);
         holder.text.setText(textList.get(position));
 
-        if (displayIcon){
+        if (displayIcon) {
             holder.icon.setVisibility(View.VISIBLE);
             holder.icon.setImageDrawable(
                     ContextCompat.getDrawable(holder.icon.getContext(), iconResIdList.get(position)));
@@ -96,8 +98,6 @@ public class IconAndTextAdapter extends ArrayAdapter<String> {
         ImageView icon;
         TextView text;
     }
-
-
 
 
 }

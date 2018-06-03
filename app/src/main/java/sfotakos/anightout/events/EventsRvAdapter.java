@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import sfotakos.anightout.Event;
+import sfotakos.anightout.common.Event;
 import sfotakos.anightout.R;
 
 public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventViewHolder> {
