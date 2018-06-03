@@ -3,10 +3,10 @@ package sfotakos.anightout.eventdetails;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,12 +16,14 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sfotakos.anightout.common.Event;
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Event;
 import sfotakos.anightout.databinding.ActivityEventDetailsBinding;
 import sfotakos.anightout.home.HomeActivity;
+import sfotakos.anightout.place.PlaceDetailsActivity;
 
-import static sfotakos.anightout.newevent.NewEventActivity.HOME_ACTIVITY_PARENT;
+import static sfotakos.anightout.home.HomeActivity.HOME_ACTIVITY_PARENT;
+import static sfotakos.anightout.place.PlaceDetailsActivity.PLACE_DETAILS_ACTIVITY_PARENT;
 
 public class EventDetailsActivity extends AppCompatActivity {
 
@@ -111,6 +113,11 @@ public class EventDetailsActivity extends AppCompatActivity {
                     navigationIntent = new Intent(this, HomeActivity.class);
                     navigationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     break;
+                case PLACE_DETAILS_ACTIVITY_PARENT:
+                    navigationIntent = new Intent(this, PlaceDetailsActivity.class);
+                    navigationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    break;
+
                 default:
                     throw new InvalidParameterException("Unknown parent activity");
             }

@@ -19,10 +19,12 @@ import java.util.Locale;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.ActivityNewEventBinding;
 import sfotakos.anightout.home.HomeActivity;
+import sfotakos.anightout.place.PlaceDetailsActivity;
+
+import static sfotakos.anightout.home.HomeActivity.HOME_ACTIVITY_PARENT;
+import static sfotakos.anightout.place.PlaceDetailsActivity.PLACE_DETAILS_ACTIVITY_PARENT;
 
 public class NewEventActivity extends AppCompatActivity {
-
-    public static final String HOME_ACTIVITY_PARENT = "home-activity";
 
     private ActivityNewEventBinding mBinding;
 
@@ -108,6 +110,10 @@ public class NewEventActivity extends AppCompatActivity {
             switch (action) {
                 case HOME_ACTIVITY_PARENT:
                     navigationIntent = new Intent(this, HomeActivity.class);
+                    navigationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    break;
+                case PLACE_DETAILS_ACTIVITY_PARENT:
+                    navigationIntent = new Intent(this, PlaceDetailsActivity.class);
                     navigationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     break;
                 default:

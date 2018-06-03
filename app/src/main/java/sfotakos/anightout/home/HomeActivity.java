@@ -10,6 +10,7 @@ import sfotakos.anightout.databinding.ActivityHomeBinding;
 
 public class HomeActivity extends AppCompatActivity {
 
+    public static final String HOME_ACTIVITY_PARENT = "home-activity";
     private ActivityHomeBinding mBinding;
 
     @Override

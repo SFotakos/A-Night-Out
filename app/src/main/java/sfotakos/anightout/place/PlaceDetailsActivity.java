@@ -5,26 +5,33 @@ import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
+import sfotakos.anightout.databinding.LayoutAddEventBinding;
+import sfotakos.anightout.eventdetails.EventDetailsActivity;
 import sfotakos.anightout.eventdetails.PlacePhotosRvAdapter;
+import sfotakos.anightout.events.EventsRvAdapter;
 import sfotakos.anightout.newevent.GooglePlacesRequestParams;
+import sfotakos.anightout.newevent.NewEventActivity;
 
 public class PlaceDetailsActivity extends AppCompatActivity {
 
     // TODO better name
     public final static String PLACE_EXTRA = "PLACEDETAILS_EXTRA";
+    public static final String PLACE_DETAILS_ACTIVITY_PARENT = "place-details-activity";
 
     private ActivityPlaceDetailsBinding mBinding;
 
@@ -72,8 +79,6 @@ public class PlaceDetailsActivity extends AppCompatActivity {
 
             }
         }
-
-
     }
 
     @Override
@@ -88,8 +93,48 @@ public class PlaceDetailsActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_add_to_event) {
-            Toast.makeText(this, "Add to event!", Toast.LENGTH_LONG).show();
+            LayoutInflater inflater = getLayoutInflater();
 
+            // TODO dialog currently ignoring margin and cutting cardView layout, research how to fix it
+
+            LayoutAddEventBinding dialogBinding = DataBindingUtil.inflate(inflater, R.layout.layout_add_event, null, false);
+            dialogBinding.addEventRootCardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent newEventIntent =
+                            new Intent(PlaceDetailsActivity.this, NewEventActivity.class);
+                    newEventIntent.setAction(PLACE_DETAILS_ACTIVITY_PARENT);
+                    startActivity(newEventIntent);
+                }
+            });
+
+            List<Event> eventList = new ArrayList<>();
+
+            // TODO remove mock
+            Event event = null;
+            for (int i = 0; i < 3; i++) {
+                event = new Event();
+                event.setEventDate("16/05/2018 0" + i + ":00");
+                event.setEventName("An Event Name #" + i);
+                event.setEventEstablishment("An Establishment Name #" + i);
+                eventList.add(event);
+            }
+
+            dialogBinding.addEventEventsRv
+                    .setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
+                        @Override
+                        public void eventClicked(Event event) {
+                            Intent eventDetailsIntent = new Intent(
+                                    PlaceDetailsActivity.this, EventDetailsActivity.class);
+                            eventDetailsIntent.putExtra(EventDetailsActivity.EVENT_EXTRA, event);
+                            eventDetailsIntent.setAction(PLACE_DETAILS_ACTIVITY_PARENT);
+                            startActivity(eventDetailsIntent);
+                        }
+                    }, eventList));
+            dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(this));
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Add to event").setView(dialogBinding.getRoot()).show();
             return true;
         }
 
