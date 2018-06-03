@@ -1,5 +1,7 @@
 package sfotakos.anightout.newevent;
 
+import java.security.InvalidParameterException;
+
 import sfotakos.anightout.R;
 
 public class GooglePlacesRequestParams {
@@ -7,7 +9,7 @@ public class GooglePlacesRequestParams {
     private String mType = PlaceType.RESTAURANT.getTag();
     private String mPrice = PlacePrice.VERYEXPENSIVE.getTag();
 
-   // TODO make description strings.xml IDs
+   // TODO make description strings.xml resources
 
     public enum PlaceType {
 
@@ -64,6 +66,14 @@ public class GooglePlacesRequestParams {
         PlacePrice(String description, String tag){
           this.description = description;
           this.tag = tag;
+        }
+
+        public static String getDescriptionByTag(String tag){
+            for (PlacePrice placePrice : PlacePrice.values()){
+                if (placePrice.tag.equals(tag))
+                    return placePrice.description;
+            }
+            throw new InvalidParameterException();
         }
 
         public String getDescription() {

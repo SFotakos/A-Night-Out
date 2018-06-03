@@ -9,15 +9,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
 import sfotakos.anightout.eventdetails.PlacePhotosRvAdapter;
+import sfotakos.anightout.newevent.GooglePlacesRequestParams;
 
 public class PlaceDetailsActivity extends AppCompatActivity {
 
@@ -44,19 +46,33 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                 if (mPlace == null) {
                     throw new RuntimeException("Place data was not recovered properly");
                 }
+
+                mBinding.placeDetails.placeNameTextView.setText(mPlace.getName());
+                mBinding.placeDetails.placeAddressTextView.setText(mPlace.getVicinity());
+
+                if (mPlace.getPriceLevel() == null) {
+                    mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
+                } else {
+                    mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
+                    mBinding.placeDetails.placePriceTextView.setText(
+                            GooglePlacesRequestParams.PlacePrice.getDescriptionByTag(
+                                    mPlace.getPriceLevel().toString()));
+                }
+
+                // TODO add google photos api call*
+                List<Uri> tempUriList = new ArrayList<>();
+                tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image1"));
+                tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image2"));
+                tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image3"));
+
+                mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(tempUriList));
+                mBinding.placeDetails.placePhotosRv.setLayoutManager(
+                        new LinearLayoutManager(this,
+                                LinearLayoutManager.HORIZONTAL, false));
+
             }
         }
 
-        // TODO add google photos api call*
-        List<Uri> tempUriList = new ArrayList<>();
-        tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image1"));
-        tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image2"));
-        tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image3"));
-
-        mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(tempUriList));
-        mBinding.placeDetails.placePhotosRv.setLayoutManager(
-                new LinearLayoutManager(this,
-                        LinearLayoutManager.HORIZONTAL, false));
 
     }
 
