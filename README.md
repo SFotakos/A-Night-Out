@@ -1,5 +1,9 @@
 #  A Night Out
 
+<h1 align=center>
+<img src="Logo/horizontal.png" width=90%>
+</h1>
+
 **A Night Out** is an app focused on making gathering with friends easy, it integrates Google Maps and Google Places allowing users to select a place and create events so they can invite other people.
 
 ## Getting Started
