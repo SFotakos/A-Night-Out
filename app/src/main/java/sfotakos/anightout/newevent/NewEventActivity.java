@@ -1,12 +1,14 @@
 package sfotakos.anightout.newevent;
 
 import android.app.DatePickerDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.Toast;
@@ -17,6 +19,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.data.NightOutContract.EventEntry;
 import sfotakos.anightout.databinding.ActivityNewEventBinding;
 import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.place.PlaceDetailsActivity;
@@ -24,6 +27,7 @@ import sfotakos.anightout.place.PlaceDetailsActivity;
 import static sfotakos.anightout.home.HomeActivity.HOME_ACTIVITY_PARENT;
 import static sfotakos.anightout.place.PlaceDetailsActivity.PLACE_DETAILS_ACTIVITY_PARENT;
 
+// TODO implement entry validation
 public class NewEventActivity extends AppCompatActivity {
 
     private ActivityNewEventBinding mBinding;
@@ -92,12 +96,30 @@ public class NewEventActivity extends AppCompatActivity {
         mBinding.newEventDateEditText.setText(sdf.format(myCalendar.getTime()));
     }
 
-    private void setupSaveButton(){
+    private void setupSaveButton() {
         mBinding.newEventSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Saved!", Toast.LENGTH_LONG).show();
-                onNavigateUp();
+                ContentValues contentValues = new ContentValues();
+
+                contentValues.put(EventEntry.EVENT_NAME,
+                        mBinding.newEventNameInputEditText.getText().toString());
+                contentValues.put(EventEntry.EVENT_DATE,
+                        mBinding.newEventDateEditText.getText().toString());
+                contentValues.put(EventEntry.EVENT_DESCRIPTION,
+                        mBinding.newEventDescriptionInputEditText.getText().toString());
+
+                Uri uri = getContentResolver()
+                        .insert(EventEntry.CONTENT_URI, contentValues);
+
+                if (uri != null) {
+                    onNavigateUp();
+                } else {
+                    Toast.makeText(
+                            v.getContext(),
+                            "There was a problem saving the event, please try again",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
