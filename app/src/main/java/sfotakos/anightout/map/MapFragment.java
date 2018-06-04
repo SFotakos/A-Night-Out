@@ -65,7 +65,7 @@ import sfotakos.anightout.common.NetworkUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.R;
 import sfotakos.anightout.databinding.FragmentMapBinding;
-import sfotakos.anightout.newevent.GooglePlacesRequestParams;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
 import sfotakos.anightout.place.PlaceDetailsActivity;
 
 import static android.app.Activity.RESULT_OK;

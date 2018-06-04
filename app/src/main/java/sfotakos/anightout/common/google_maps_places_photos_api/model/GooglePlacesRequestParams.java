@@ -1,4 +1,4 @@
-package sfotakos.anightout.newevent;
+package sfotakos.anightout.common.google_maps_places_photos_api.model;
 
 import java.security.InvalidParameterException;
 

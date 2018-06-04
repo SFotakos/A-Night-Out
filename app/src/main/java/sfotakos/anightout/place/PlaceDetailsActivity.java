@@ -24,7 +24,7 @@ import sfotakos.anightout.databinding.LayoutAddEventBinding;
 import sfotakos.anightout.eventdetails.EventDetailsActivity;
 import sfotakos.anightout.eventdetails.PlacePhotosRvAdapter;
 import sfotakos.anightout.events.EventsRvAdapter;
-import sfotakos.anightout.newevent.GooglePlacesRequestParams;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
 import sfotakos.anightout.newevent.NewEventActivity;
 
 //TODO query place details and fill layout with more information
