@@ -27,7 +27,6 @@ import sfotakos.anightout.newevent.NewEventActivity;
 public class EventsFragment extends Fragment {
 
     private FragmentEventBinding mBinding;
-    private boolean isEventsRvPopulated;
 
     public EventsFragment() {
         // Required empty public constructor
@@ -63,30 +62,19 @@ public class EventsFragment extends Fragment {
                 startActivity(newEventIntent);
             }
         });
-
-        if (!isEventsRvPopulated){
-            setupEventRv();
-        }
     }
 
     @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            if (getView() != null) {
-                setupEventRv();
-                isEventsRvPopulated = true;
-            } else {
-                isEventsRvPopulated = false;
-            }
-        }
+    public void onResume() {
+        super.onResume();
+        setupEventRv();
     }
 
-    private void setupEventRv(){
+    private void setupEventRv() {
         mBinding.eventRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
             @Override
             public void eventClicked(Event event) {
-                Intent eventDetailsIntent = new Intent (getActivity(), EventDetailsActivity.class);
+                Intent eventDetailsIntent = new Intent(getActivity(), EventDetailsActivity.class);
                 eventDetailsIntent.putExtra(EventDetailsActivity.EVENT_EXTRA, event);
                 eventDetailsIntent.setAction(HomeActivity.HOME_ACTIVITY_PARENT);
                 startActivity(eventDetailsIntent);
