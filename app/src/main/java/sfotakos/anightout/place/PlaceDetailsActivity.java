@@ -17,6 +17,7 @@ import java.util.List;
 
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Event;
+import sfotakos.anightout.common.NetworkUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
 import sfotakos.anightout.databinding.LayoutAddEventBinding;
@@ -26,6 +27,7 @@ import sfotakos.anightout.events.EventsRvAdapter;
 import sfotakos.anightout.newevent.GooglePlacesRequestParams;
 import sfotakos.anightout.newevent.NewEventActivity;
 
+//TODO query place details and fill layout with more information
 public class PlaceDetailsActivity extends AppCompatActivity {
 
     // TODO better name
@@ -65,16 +67,29 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                                     mPlace.getPriceLevel().toString()));
                 }
 
-                // TODO add google photos api call*
-                List<Uri> tempUriList = new ArrayList<>();
-                tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image1"));
-                tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image2"));
-                tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image3"));
+                // TODO move this to a request class which returns the fully qualified uri
+                if (mPlace.getPhotos() != null &&
+                        mPlace.getPhotos().size() != 0 &&
+                        mPlace.getPhotos().get(0) != null) {
 
-                mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(tempUriList));
-                mBinding.placeDetails.placePhotosRv.setLayoutManager(
-                        new LinearLayoutManager(this,
-                                LinearLayoutManager.HORIZONTAL, false));
+                    List<Uri> photosUri = new ArrayList<>();
+                    Uri photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
+                            .appendPath("photo")
+                            .appendQueryParameter("key", getResources().getString(R.string.google_places_key))
+                            .appendQueryParameter("maxheight", "400")
+                            .appendQueryParameter("photo_reference", mPlace.getPhotos().get(0).getPhotoReference())
+                            .build();
+
+                    photosUri.add(photoUri);
+
+                    mBinding.placeDetails.placePhotosRv.setVisibility(View.VISIBLE);
+                    mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(photosUri));
+                    mBinding.placeDetails.placePhotosRv.setLayoutManager(
+                            new LinearLayoutManager(this,
+                                    LinearLayoutManager.HORIZONTAL, false));
+                } else {
+                    mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
+                }
 
             }
         }

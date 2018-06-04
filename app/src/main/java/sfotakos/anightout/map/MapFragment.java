@@ -59,7 +59,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import sfotakos.anightout.common.DrawableUtils;
-import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesResponse;
+import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesPlaceResponse;
 import sfotakos.anightout.common.IconAndTextAdapter;
 import sfotakos.anightout.common.NetworkUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
@@ -75,7 +75,7 @@ import static android.app.Activity.RESULT_OK;
  */
 // TODO finish filter layout
 // TODO persist state after rotation
-public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback, Callback<GooglePlacesResponse> {
+public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback, Callback<GooglePlacesPlaceResponse> {
 
     public final static int LOCATION_PERMISSION_REQUEST_CODE = 12045;
     public final static int REQUEST_GPS_SETTINGS_CODE = 45012;
@@ -242,9 +242,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     //region retrofitCallResponse
     @Override
-    public void onResponse(@NonNull Call<GooglePlacesResponse> call, @NonNull Response<GooglePlacesResponse> response) {
+    public void onResponse(@NonNull Call<GooglePlacesPlaceResponse> call, @NonNull Response<GooglePlacesPlaceResponse> response) {
         canUseFilterActions(true);
-        GooglePlacesResponse placesResponse = response.body();
+        GooglePlacesPlaceResponse placesResponse = response.body();
         if (placesResponse != null) {
             List<Place> places = placesResponse.getResults();
             for (final Place place : places) {
@@ -266,7 +266,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     @Override
-    public void onFailure(@NonNull Call<GooglePlacesResponse> call, @NonNull Throwable t) {
+    public void onFailure(@NonNull Call<GooglePlacesPlaceResponse> call, @NonNull Throwable t) {
         canUseFilterActions(true);
         t.printStackTrace();
     }
@@ -456,7 +456,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void requestPlacesFromAPI() {
         clearSearchedPlaces();
         canUseFilterActions(false);
-        Call<GooglePlacesResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
+        Call<GooglePlacesPlaceResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
                 getResources().getString(R.string.google_places_key),
                 mClickedLatLng.latitude + "," + mClickedLatLng.longitude,
                 Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress() + MIN_SEARCH_RADIUS),
