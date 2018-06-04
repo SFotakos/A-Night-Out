@@ -23,7 +23,7 @@ public class NightOutDbHelper extends SQLiteOpenHelper {
 
                 "CREATE TABLE " + EventEntry.TABLE_NAME + " (" +
 
-                        EventEntry.EVENT_ID + " INTEGER PRIMARY KEY ON CONFLICT REPLACE," +
+                        EventEntry.EVENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 
                         EventEntry.EVENT_NAME + " TEXT, " +
                         EventEntry.EVENT_DATE + " TEXT," +
