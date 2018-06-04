@@ -46,6 +46,10 @@
                 android:value=".home.HomeActivity" />
 
         </activity>
-    </application>
 
+        <provider
+            android:name="sfotakos.anightout.common.data.NightOutProvider"
+            android:authorities="sfotakos.anightout"
+            android:exported="false"/>
+    </application>
 </manifest>
