@@ -1,6 +1,7 @@
 package sfotakos.anightout.place;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +20,13 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.NetworkUtil;
+import sfotakos.anightout.common.data.NightOutContract.EventEntry;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
 import sfotakos.anightout.databinding.LayoutAddEventBinding;
-import sfotakos.anightout.eventdetails.EventDetailsActivity;
 import sfotakos.anightout.eventdetails.PlacePhotosRvAdapter;
 import sfotakos.anightout.events.EventsRvAdapter;
-import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
 import sfotakos.anightout.newevent.NewEventActivity;
 
 //TODO query place details and fill layout with more information
@@ -35,6 +37,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
     public static final String PLACE_DETAILS_ACTIVITY_PARENT = "place-details-activity";
 
     private ActivityPlaceDetailsBinding mBinding;
+    private AlertDialog mEventsDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +109,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_add_to_event) {
-            LayoutAddEventBinding dialogBinding =
+            final LayoutAddEventBinding dialogBinding =
                     DataBindingUtil.inflate(getLayoutInflater(),
                             R.layout.layout_add_event, null, false);
 
@@ -117,38 +120,69 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                             new Intent(PlaceDetailsActivity.this, NewEventActivity.class);
                     newEventIntent.setAction(PLACE_DETAILS_ACTIVITY_PARENT);
                     startActivity(newEventIntent);
+
+                    if (mEventsDialog != null){
+                        mEventsDialog.dismiss();
+                    }
                 }
             });
-
-            // TODO remove mock
-            List<Event> eventList = new ArrayList<>();
-            Event event = null;
-            for (int i = 0; i < 3; i++) {
-                event = new Event();
-                event.setEventDate("16/05/2018 0" + i + ":00");
-                event.setEventName("An Event Name #" + i);
-                event.setEventEstablishment("An Establishment Name #" + i);
-                eventList.add(event);
-            }
 
             dialogBinding.addEventEventsRv
                     .setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
                         @Override
                         public void eventClicked(Event event) {
-                            Intent eventDetailsIntent = new Intent(
-                                    PlaceDetailsActivity.this, EventDetailsActivity.class);
-                            eventDetailsIntent.putExtra(EventDetailsActivity.EVENT_EXTRA, event);
-                            eventDetailsIntent.setAction(PLACE_DETAILS_ACTIVITY_PARENT);
-                            startActivity(eventDetailsIntent);
+                            // TODO add to event
+                            Toast.makeText(PlaceDetailsActivity.this,
+                                    "Add to this event", Toast.LENGTH_LONG).show();
                         }
-                    }, eventList));
+                    }, queryEvents()));
             dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(this));
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Add to event").setView(dialogBinding.getRoot()).show();
+            mEventsDialog = builder.setTitle("Add to event").setView(dialogBinding.getRoot()).show();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    // TODO this is duplicated
+    private List<Event> queryEvents() {
+        List<Event> eventList = new ArrayList<>();
+        Cursor cursor = getContentResolver().query(
+                EventEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Event event = new Event();
+                int eventIdIndex = cursor.getColumnIndex(EventEntry.EVENT_ID);
+                int eventNameIndex = cursor.getColumnIndex(EventEntry.EVENT_NAME);
+                int eventDateIndex = cursor.getColumnIndex(EventEntry.EVENT_DATE);
+                int eventDescriptionIndex = cursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
+
+                int placeNameIndex = cursor.getColumnIndex(EventEntry.RESTAURANT_NAME);
+                int placePriceRangeIndex = cursor.getColumnIndex(EventEntry.RESTAURANT_PRICE_RANGE);
+                int placeAddressIndex = cursor.getColumnIndex(EventEntry.RESTAURANT_ADDRESS);
+
+                event.setEventId((cursor.getInt(eventIdIndex)));
+                event.setEventName(cursor.getString(eventNameIndex));
+                event.setEventDate(cursor.getString(eventDateIndex));
+                event.setEventDescription(cursor.getString(eventDescriptionIndex));
+
+                Place place = new Place();
+                place.setName(cursor.getString(placeNameIndex));
+                place.setPriceLevel(cursor.getInt(placePriceRangeIndex));
+                place.setVicinity(cursor.getString(placeAddressIndex));
+
+                event.setPlace(place);
+                eventList.add(event);
+            }
+            cursor.close();
+        }
+        return eventList;
     }
 }

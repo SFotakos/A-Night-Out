@@ -10,8 +10,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import sfotakos.anightout.common.Event;
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Event;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 
 public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventViewHolder> {
 
@@ -38,7 +39,14 @@ public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventV
 
             holder.mEventDate.setText(event.getEventDate());
             holder.mEventName.setText(event.getEventName());
-            holder.mEstablishmentName.setText(event.getEventEstablishment());
+
+            Place place = event.getPlace();
+            if (place != null){
+                holder.mEstablishmentName.setText(place.getName());
+                holder.mEstablishmentName.setVisibility(View.VISIBLE);
+            } else {
+                holder.mEstablishmentName.setVisibility(View.GONE);
+            }
     }
 
     @Override
