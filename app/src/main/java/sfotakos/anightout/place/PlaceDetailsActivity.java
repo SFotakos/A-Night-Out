@@ -8,7 +8,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -91,13 +90,11 @@ public class PlaceDetailsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.action_add_to_event) {
-            LayoutInflater inflater = getLayoutInflater();
+            LayoutAddEventBinding dialogBinding =
+                    DataBindingUtil.inflate(getLayoutInflater(),
+                            R.layout.layout_add_event, null, false);
 
-            // TODO dialog currently ignoring margin and cutting cardView layout, research how to fix it
-
-            LayoutAddEventBinding dialogBinding = DataBindingUtil.inflate(inflater, R.layout.layout_add_event, null, false);
             dialogBinding.addEventRootCardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -108,9 +105,8 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                 }
             });
 
-            List<Event> eventList = new ArrayList<>();
-
             // TODO remove mock
+            List<Event> eventList = new ArrayList<>();
             Event event = null;
             for (int i = 0; i < 3; i++) {
                 event = new Event();
