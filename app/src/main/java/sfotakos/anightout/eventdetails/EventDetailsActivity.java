@@ -1,8 +1,10 @@
 package sfotakos.anightout.eventdetails;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,7 +13,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +25,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.security.InvalidParameterException;
@@ -41,6 +45,8 @@ import static sfotakos.anightout.home.HomeActivity.HOME_ACTIVITY_PARENT;
 import static sfotakos.anightout.place.PlaceDetailsActivity.PLACE_DETAILS_ACTIVITY_PARENT;
 
 public class EventDetailsActivity extends AppCompatActivity {
+
+    public final static int WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 28145;
 
     // TODO better name
     public final static String EVENT_EXTRA = "EVENTDETAILS_EVENT";
@@ -141,14 +147,11 @@ public class EventDetailsActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.detailsAction_share:
-                Toast.makeText(this, "Share", Toast.LENGTH_SHORT).show();
-                Bitmap shareableBitmap = getBitmapByView(mBinding.eventDetailsShareableContentCl);
-
-                final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(Intent.EXTRA_STREAM, getImageUri(this, shareableBitmap));
-                intent.setType("image/png");
-                startActivity(Intent.createChooser(intent, "Share image with ..."));
+                if (hasStoragePermission()) {
+                    shareEvent();
+                } else {
+                    requestStoragePermission();
+                }
                 return true;
 
             case R.id.detailsAction_delete:
@@ -181,6 +184,22 @@ public class EventDetailsActivity extends AppCompatActivity {
                 break;
         }
         return false;
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            // After permission was granted
+            case WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    shareEvent();
+                }
+            }
+        }
     }
 
     @Nullable
@@ -217,6 +236,28 @@ public class EventDetailsActivity extends AppCompatActivity {
         return navigationIntent;
     }
 
+    private boolean hasStoragePermission() {
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        return permissionCheck == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestStoragePermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE);
+    }
+
+    private void shareEvent() {
+        Bitmap shareableBitmap = getBitmapByView(mBinding.eventDetailsShareableContentCl);
+
+        final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Intent.EXTRA_STREAM, getImageUri(this, shareableBitmap));
+        intent.setType("image/png");
+        startActivity(Intent.createChooser(intent, "Share image with ..."));
+    }
+
     // As seen from https://www.logicchip.com/share-image-without-saving/
     private Bitmap getBitmapByView(ViewGroup view) {
         Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
@@ -236,7 +277,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     // As seen from https://stackoverflow.com/a/16168087/5075144
     public Uri getImageUri(Context inContext, Bitmap inImage) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        inImage.compress(Bitmap.CompressFormat.PNG, 100, bytes);
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(),
                 inImage, "Title", null);
         return Uri.parse(path);
