@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import java.security.InvalidParameterException;
@@ -18,6 +19,9 @@ import java.util.List;
 
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Event;
+import sfotakos.anightout.common.NetworkUtil;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityEventDetailsBinding;
 import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.place.PlaceDetailsActivity;
@@ -46,30 +50,54 @@ public class EventDetailsActivity extends AppCompatActivity {
                 if (mEvent == null) {
                     throw new RuntimeException("Event data was not recovered properly");
                 }
+
+                setSupportActionBar(mBinding.eventDetailsToolbar);
+                ActionBar actionBar = getSupportActionBar();
+                if (actionBar != null) {
+                    actionBar.setDisplayHomeAsUpEnabled(true);
+                    actionBar.setTitle(mEvent.getEventName());
+                }
+
+                mBinding.eventDetailsDescriptionTextView.setText(mEvent.getEventDescription());
+                mBinding.eventDetailsDateTimeTextView.setText(mEvent.getEventDate());
+
+                Place place = mEvent.getPlace();
+                if (place != null) {
+                    if (place.getPhotos() != null && place.getPhotos().size() > 0) {
+                        List<Uri> photosUri = new ArrayList<>();
+                        Uri photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
+                                .appendPath("photo")
+                                .appendQueryParameter("key", getResources().getString(R.string.google_places_key))
+                                .appendQueryParameter("maxheight", "400")
+                                .appendQueryParameter("photo_reference", mEvent.getPlace().getPhotos().get(0).getPhotoReference())
+                                .build();
+
+                        photosUri.add(photoUri);
+                        // TODO add snapping into position for a gallery like effect
+                        // TODO add paging, something like https://stackoverflow.com/a/46084182
+                        mBinding.placeDetails.placePhotosRv.setVisibility(View.VISIBLE);
+                        mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(photosUri));
+                        mBinding.placeDetails.placePhotosRv.setLayoutManager(
+                                new LinearLayoutManager(this,
+                                        LinearLayoutManager.HORIZONTAL, false));
+                    } else {
+                        mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
+                    }
+
+                    mBinding.placeDetails.placeNameTextView.setText(place.getName());
+                    mBinding.placeDetails.placeAddressTextView.setText(place.getVicinity());
+
+                    if (place.getPriceLevel() <= 4) {
+                        mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
+                        mBinding.placeDetails.placePriceTextView.setText(
+                                GooglePlacesRequestParams.PlacePrice.getDescriptionByTag(
+                                        Integer.toString(place.getPriceLevel())));
+                    } else {
+                        mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
+                    }
+                }
             }
         }
-
-        //TODO proper nullcheck
-        setSupportActionBar(mBinding.eventDetailsToolbar);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(mEvent.getEventName());
-        }
-
-        // TODO remove mock
-        List<Uri> tempUriList = new ArrayList<>();
-        tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image1"));
-        tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image2"));
-        tempUriList.add(Uri.parse("http://placehold.it/350x200&text=image3"));
-
-        // TODO add snapping into position for a gallery like effect
-        // TODO add paging, something like https://stackoverflow.com/a/46084182
-        mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(tempUriList));
-        mBinding.placeDetails.placePhotosRv.setLayoutManager(
-                new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false));
-
     }
 
     @Override
