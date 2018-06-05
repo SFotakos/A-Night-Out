@@ -1,9 +1,15 @@
 package sfotakos.anightout.eventdetails;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,8 +17,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,6 +139,13 @@ public class EventDetailsActivity extends AppCompatActivity {
             // action with ID action_refresh was selected
             case R.id.detailsAction_share:
                 Toast.makeText(this, "Share", Toast.LENGTH_SHORT).show();
+                Bitmap shareableBitmap = getBitmapByView(mBinding.eventDetailsShareableContentCl);
+
+                final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(Intent.EXTRA_STREAM, getImageUri(this, shareableBitmap));
+                intent.setType("image/png");
+                startActivity(Intent.createChooser(intent, "Share image with ..."));
                 return true;
             default:
                 break;
@@ -170,5 +185,30 @@ public class EventDetailsActivity extends AppCompatActivity {
             }
         }
         return navigationIntent;
+    }
+
+    // As seen from https://www.logicchip.com/share-image-without-saving/
+    private Bitmap getBitmapByView(ViewGroup view){
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Drawable bgDrawable = view.getBackground();
+        if (bgDrawable!=null) {
+            //has background drawable, then draw it on the canvas
+            bgDrawable.draw(canvas);
+        }   else{
+            //does not have background drawable, then draw white background on the canvas
+            canvas.drawColor(Color.WHITE);
+        }
+        view.draw(canvas);
+        return bitmap;
+    }
+
+    // As seen from https://stackoverflow.com/a/16168087/5075144
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(),
+                inImage, "Title", null);
+        return Uri.parse(path);
     }
 }
