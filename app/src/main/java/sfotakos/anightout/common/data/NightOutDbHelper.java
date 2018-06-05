@@ -10,7 +10,7 @@ public class NightOutDbHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "nightout.db";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public NightOutDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -29,9 +29,11 @@ public class NightOutDbHelper extends SQLiteOpenHelper {
                         EventEntry.EVENT_DATE + " TEXT," +
                         EventEntry.EVENT_DESCRIPTION + " TEXT, " +
 
-                        EventEntry.RESTAURANT_NAME + " TEXT, " +
-                        EventEntry.RESTAURANT_PRICE_RANGE + " TEXT, " +
-                        EventEntry.RESTAURANT_ADDRESS + " TEXT);";
+                        EventEntry.PLACE_ID + " TEXT, " +
+                        EventEntry.PLACE_NAME + " TEXT, " +
+                        EventEntry.PLACE_PHOTO_REF + " TEXT, " +
+                        EventEntry.PLACE_PRICE_RANGE + " INTEGER DEFAULT -1, " +
+                        EventEntry.PLACE_ADDRESS + " TEXT);";
 
         sqLiteDatabase.execSQL(SQL_CREATE_MOVIE_LIST_TABLE);
     }

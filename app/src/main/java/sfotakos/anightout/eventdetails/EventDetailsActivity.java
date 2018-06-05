@@ -87,7 +87,7 @@ public class EventDetailsActivity extends AppCompatActivity {
                     mBinding.placeDetails.placeNameTextView.setText(place.getName());
                     mBinding.placeDetails.placeAddressTextView.setText(place.getVicinity());
 
-                    if (place.getPriceLevel() <= 4) {
+                    if (place.getPriceLevel() >= 0) {
                         mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
                         mBinding.placeDetails.placePriceTextView.setText(
                                 GooglePlacesRequestParams.PlacePrice.getDescriptionByTag(

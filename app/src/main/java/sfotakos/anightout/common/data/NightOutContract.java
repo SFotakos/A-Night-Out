@@ -24,9 +24,11 @@ public class NightOutContract {
         public static final String EVENT_DATE = "event_date";
         public static final String EVENT_DESCRIPTION = "event_description";
 
-        public static final String RESTAURANT_NAME = "restaurant_name";
-        public static final String RESTAURANT_PRICE_RANGE = "restaurant_price_range";
-        public static final String RESTAURANT_ADDRESS = "restaurant_address";
+        public static final String PLACE_ID = "place_id";
+        public static final String PLACE_NAME = "place_name";
+        public static final String PLACE_PHOTO_REF = "place_photo_ref";
+        public static final String PLACE_PRICE_RANGE = "place_price_range";
+        public static final String PLACE_ADDRESS = "place_address";
     }
 
 }
