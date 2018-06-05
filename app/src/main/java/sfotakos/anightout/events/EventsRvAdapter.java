@@ -41,7 +41,7 @@ public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventV
             holder.mEventName.setText(event.getEventName());
 
             Place place = event.getPlace();
-            if (place != null){
+            if (place != null && place.getName() != null && !place.getName().isEmpty()){
                 holder.mEstablishmentName.setText(place.getName());
                 holder.mEstablishmentName.setVisibility(View.VISIBLE);
             } else {
