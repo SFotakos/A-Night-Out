@@ -1,6 +1,7 @@
 package sfotakos.anightout.eventdetails;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
@@ -28,6 +30,7 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.NetworkUtil;
+import sfotakos.anightout.common.data.NightOutContract;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityEventDetailsBinding;
@@ -43,14 +46,14 @@ public class EventDetailsActivity extends AppCompatActivity {
     public final static String EVENT_EXTRA = "EVENTDETAILS_EVENT";
 
     private ActivityEventDetailsBinding mBinding;
-
+    private Event mEvent;
+    private AlertDialog deleteConfirmationDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_event_details);
 
-        Event mEvent = null;
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.hasExtra(EVENT_EXTRA)) {
@@ -136,7 +139,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            // action with ID action_refresh was selected
+
             case R.id.detailsAction_share:
                 Toast.makeText(this, "Share", Toast.LENGTH_SHORT).show();
                 Bitmap shareableBitmap = getBitmapByView(mBinding.eventDetailsShareableContentCl);
@@ -147,6 +150,33 @@ public class EventDetailsActivity extends AppCompatActivity {
                 intent.setType("image/png");
                 startActivity(Intent.createChooser(intent, "Share image with ..."));
                 return true;
+
+            case R.id.detailsAction_delete:
+                if (deleteConfirmationDialog == null) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Uri eventByIdUri = NightOutContract.EventEntry.CONTENT_URI.buildUpon()
+                                    .appendPath(String.valueOf(mEvent.getEventId())).build();
+
+                            getContentResolver().delete(eventByIdUri, null, null);
+                            onNavigateUp();
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.setTitle("Confirm event deletion?");
+                    deleteConfirmationDialog = builder.create();
+                }
+
+                if (!deleteConfirmationDialog.isShowing())
+                    deleteConfirmationDialog.show();
+
+                return true;
+
             default:
                 break;
         }
@@ -188,14 +218,14 @@ public class EventDetailsActivity extends AppCompatActivity {
     }
 
     // As seen from https://www.logicchip.com/share-image-without-saving/
-    private Bitmap getBitmapByView(ViewGroup view){
-        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
+    private Bitmap getBitmapByView(ViewGroup view) {
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Drawable bgDrawable = view.getBackground();
-        if (bgDrawable!=null) {
+        if (bgDrawable != null) {
             //has background drawable, then draw it on the canvas
             bgDrawable.draw(canvas);
-        }   else{
+        } else {
             //does not have background drawable, then draw white background on the canvas
             canvas.drawColor(Color.WHITE);
         }
