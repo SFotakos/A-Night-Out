@@ -123,7 +123,23 @@ public class NightOutProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
-        throw new UnsupportedOperationException("We do not need to update entries");
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        int updatedEvent;
+        switch (sUriMatcher.match(uri)){
+            case CODE_EVENTS_WITH_ID:
+                String eventId = uri.getPathSegments().get(1);
+                updatedEvent = db.update(EventEntry.TABLE_NAME, contentValues,
+                        EventEntry.EVENT_ID + "=?", new String[]{eventId});
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Uri: " + uri);
+        }
+        if (updatedEvent != 0){
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return updatedEvent;
     }
 
     @Nullable

@@ -1,5 +1,6 @@
 package sfotakos.anightout.place;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
@@ -12,7 +13,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +38,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
 
     private ActivityPlaceDetailsBinding mBinding;
     private AlertDialog mEventsDialog;
+    private Place mPlace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +54,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.hasExtra(PLACE_EXTRA)) {
-                Place mPlace = (Place) intent.getSerializableExtra(PLACE_EXTRA);
+                mPlace = (Place) intent.getSerializableExtra(PLACE_EXTRA);
                 if (mPlace == null) {
                     throw new RuntimeException("Place data was not recovered properly");
                 }
@@ -121,7 +122,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     newEventIntent.setAction(PLACE_DETAILS_ACTIVITY_PARENT);
                     startActivity(newEventIntent);
 
-                    if (mEventsDialog != null){
+                    if (mEventsDialog != null) {
                         mEventsDialog.dismiss();
                     }
                 }
@@ -131,9 +132,53 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     .setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
                         @Override
                         public void eventClicked(Event event) {
-                            // TODO add to event
-                            Toast.makeText(PlaceDetailsActivity.this,
-                                    "Add to this event", Toast.LENGTH_LONG).show();
+                            Uri eventByIdUri = EventEntry.CONTENT_URI.buildUpon()
+                                    .appendPath(String.valueOf(event.getEventId())).build();
+                            Cursor eventByIdCursor = getContentResolver().query(
+                                    eventByIdUri,
+                                    null,
+                                    null,
+                                    null,
+                                    null);
+
+                            if ((eventByIdCursor != null && eventByIdCursor.getCount() != 0)) {
+                                eventByIdCursor.moveToFirst();
+                                ContentValues contentValues = new ContentValues();
+
+                                int eventIdIndex =
+                                        eventByIdCursor.getColumnIndex(EventEntry.EVENT_ID);
+                                int eventNameIndex =
+                                        eventByIdCursor.getColumnIndex(EventEntry.EVENT_NAME);
+                                int eventDateIndex =
+                                        eventByIdCursor.getColumnIndex(EventEntry.EVENT_DATE);
+                                int eventDescriptionIndex =
+                                        eventByIdCursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
+
+                                contentValues.put(EventEntry.EVENT_ID,
+                                        eventByIdCursor.getInt(eventIdIndex));
+                                contentValues.put(EventEntry.EVENT_NAME,
+                                        eventByIdCursor.getString(eventNameIndex));
+                                contentValues.put(EventEntry.EVENT_DATE,
+                                        eventByIdCursor.getString(eventDateIndex));
+                                contentValues.put(EventEntry.EVENT_DESCRIPTION,
+                                        eventByIdCursor.getString(eventDescriptionIndex));
+
+                                contentValues.put(EventEntry.RESTAURANT_NAME,
+                                        mPlace.getName());
+                                contentValues.put(EventEntry.RESTAURANT_PRICE_RANGE,
+                                        mPlace.getPriceLevel());
+                                contentValues.put(EventEntry.RESTAURANT_ADDRESS,
+                                        mPlace.getVicinity());
+
+                                getContentResolver().update(eventByIdUri, contentValues,
+                                        null, null);
+
+                                eventByIdCursor.close();
+
+                                if (mEventsDialog != null) {
+                                    mEventsDialog.dismiss();
+                                }
+                            }
                         }
                     }, queryEvents()));
             dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(this));
