@@ -63,13 +63,15 @@ public class EventDetailsActivity extends AppCompatActivity {
 
                 Place place = mEvent.getPlace();
                 if (place != null) {
-                    if (place.getPhotos() != null && place.getPhotos().size() > 0) {
+                    if (place.getPhotos() != null &&
+                            place.getPhotos().size() > 0 &&
+                            place.getPhotos().get(0).getPhotoReference() != null) {
                         List<Uri> photosUri = new ArrayList<>();
                         Uri photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
                                 .appendPath("photo")
                                 .appendQueryParameter("key", getResources().getString(R.string.google_places_key))
                                 .appendQueryParameter("maxheight", "400")
-                                .appendQueryParameter("photo_reference", mEvent.getPlace().getPhotos().get(0).getPhotoReference())
+                                .appendQueryParameter("photo_reference", place.getPhotos().get(0).getPhotoReference())
                                 .build();
 
                         photosUri.add(photoUri);
@@ -84,8 +86,19 @@ public class EventDetailsActivity extends AppCompatActivity {
                         mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
                     }
 
-                    mBinding.placeDetails.placeNameTextView.setText(place.getName());
-                    mBinding.placeDetails.placeAddressTextView.setText(place.getVicinity());
+                    if (place.getName() != null) {
+                        mBinding.placeDetails.placeNameTextView.setVisibility(View.VISIBLE);
+                        mBinding.placeDetails.placeNameTextView.setText(place.getName());
+                    } else {
+                        mBinding.placeDetails.placeNameTextView.setVisibility(View.GONE);
+                    }
+
+                    if (place.getVicinity() != null) {
+                        mBinding.placeDetails.placeAddressTextView.setVisibility(View.VISIBLE);
+                        mBinding.placeDetails.placeAddressTextView.setText(place.getVicinity());
+                    } else {
+                        mBinding.placeDetails.placeAddressTextView.setVisibility(View.GONE);
+                    }
 
                     if (place.getPriceLevel() >= 0) {
                         mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
@@ -95,6 +108,12 @@ public class EventDetailsActivity extends AppCompatActivity {
                     } else {
                         mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
                     }
+                } else {
+                    mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
+                    mBinding.placeDetails.placeNameTextView.setVisibility(View.GONE);
+                    mBinding.placeDetails.placeAddressTextView.setVisibility(View.GONE);
+                    mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
+                    mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
                 }
             }
         }

@@ -18,6 +18,7 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.data.NightOutContract.EventEntry;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.Photo;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.FragmentEventBinding;
 import sfotakos.anightout.eventdetails.EventDetailsActivity;
@@ -101,7 +102,9 @@ public class EventsFragment extends Fragment {
                 int eventDateIndex = cursor.getColumnIndex(EventEntry.EVENT_DATE);
                 int eventDescriptionIndex = cursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
 
+                int placeIdIndex = cursor.getColumnIndex(EventEntry.PLACE_ID);
                 int placeNameIndex = cursor.getColumnIndex(EventEntry.PLACE_NAME);
+                int placePhotoRefIndex = cursor.getColumnIndex(EventEntry.PLACE_PHOTO_REF);
                 int placePriceRangeIndex = cursor.getColumnIndex(EventEntry.PLACE_PRICE_RANGE);
                 int placeAddressIndex = cursor.getColumnIndex(EventEntry.PLACE_ADDRESS);
 
@@ -111,9 +114,16 @@ public class EventsFragment extends Fragment {
                 event.setEventDescription(cursor.getString(eventDescriptionIndex));
 
                 Place place = new Place();
+                place.setId(cursor.getString(placeIdIndex));
                 place.setName(cursor.getString(placeNameIndex));
                 place.setPriceLevel(cursor.getInt(placePriceRangeIndex));
                 place.setVicinity(cursor.getString(placeAddressIndex));
+
+                List<Photo> photoList = new ArrayList<>();
+                Photo photo = new Photo();
+                photo.setPhotoReference(cursor.getString(placePhotoRefIndex));
+                photoList.add(photo);
+                place.setPhotos(photoList);
 
                 event.setPlace(place);
                 eventList.add(event);

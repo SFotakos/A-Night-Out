@@ -163,12 +163,19 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                                 contentValues.put(EventEntry.EVENT_DESCRIPTION,
                                         eventByIdCursor.getString(eventDescriptionIndex));
 
+                                contentValues.put(EventEntry.PLACE_ID,
+                                        mPlace.getPlaceId());
                                 contentValues.put(EventEntry.PLACE_NAME,
                                         mPlace.getName());
                                 contentValues.put(EventEntry.PLACE_PRICE_RANGE,
                                         mPlace.getPriceLevel());
                                 contentValues.put(EventEntry.PLACE_ADDRESS,
                                         mPlace.getVicinity());
+
+                                if (mPlace.getPhotos() != null && mPlace.getPhotos().size() > 0) {
+                                    contentValues.put(EventEntry.PLACE_PHOTO_REF,
+                                            mPlace.getPhotos().get(0).getPhotoReference());
+                                }
 
                                 getContentResolver().update(eventByIdUri, contentValues,
                                         null, null);
