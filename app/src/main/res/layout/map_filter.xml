@@ -6,7 +6,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
-        android:padding="8dp">
+        android:padding="@dimen/padding_default">
 
         <!-- TODO Group common view using meta group from constrain layout -->
         <android.support.v7.widget.AppCompatImageView
@@ -38,7 +38,7 @@
             android:id="@+id/filter_distance_imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/margin_default"
             android:tint="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/filter_priceRange_imageView"
@@ -58,6 +58,7 @@
         <TextView
             android:id="@+id/filter_distance_textView"
             android:layout_width="0dp"
+            android:textSize="@dimen/text_subheading"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             app:layout_constraintEnd_toEndOf="parent"
@@ -68,7 +69,7 @@
             android:id="@+id/filter_place_spinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/margin_default"
             app:layout_constraintEnd_toEndOf="@+id/filter_priceRange_spinner"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/filter_distance_imageView" />
@@ -78,8 +79,8 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/margin_default"
+            android:layout_marginTop="@dimen/margin_default"
             android:text="@string/any_cancel"
             app:layout_constraintEnd_toStartOf="@id/filter_search_button"
             app:layout_constraintTop_toBottomOf="@+id/filter_place_spinner"
@@ -90,8 +91,8 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/margin_default"
+            android:layout_marginTop="@dimen/margin_default"
             android:text="@string/any_search"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/filter_place_spinner"

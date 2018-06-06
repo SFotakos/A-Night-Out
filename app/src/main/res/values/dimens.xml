@@ -1,5 +1,24 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="margin_half">@dimen/material_baseline_grid_0.5x</dimen>
+    <dimen name="margin_default">@dimen/material_baseline_grid_1x</dimen>
+    <dimen name="margin_double">@dimen/material_baseline_grid_2x</dimen>
+
+    <dimen name="padding_half">@dimen/material_baseline_grid_0.5x</dimen>
+    <dimen name="padding_default">@dimen/material_baseline_grid_1x</dimen>
+    <dimen name="padding_double">@dimen/material_baseline_grid_2x</dimen>
+
+    <dimen name="fab_size">@dimen/material_button_fab_size</dimen>
+    <dimen name="fab_margin">@dimen/material_button_fab_edge_margin</dimen>
+    <dimen name="fab_elevation_pressed">@dimen/material_elevation_fab_pressed</dimen>
+    <dimen name="fab_elevation_resting">@dimen/material_elevation_fab_resting</dimen>
+
+    <dimen name="placePhoto_minHeight">250dp</dimen>
+
+    <dimen name="text_headline">@dimen/material_typography_dense_headline_text_size</dimen>
+    <dimen name="text_title">@dimen/material_typography_regular_title_text_size</dimen>
+    <dimen name="text_subheading">@dimen/material_typography_regular_subheading_text_size</dimen>
+    <dimen name="text_regular">@dimen/material_typography_regular_body_1_text_size</dimen>
+
+
+
 </resources>

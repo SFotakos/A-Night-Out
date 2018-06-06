@@ -10,26 +10,30 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/event_rv"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <TextView
             android:id="@+id/event_noEvent_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_double"
+            android:layout_marginEnd="@dimen/margin_double"
             android:layout_gravity="center"
             android:text="@string/eventsFragment_noCurrentEvent"
             android:textColor="@android:color/darker_gray"
-            android:textSize="16sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:textSize="@dimen/text_headline" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/event_fab"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_margin="12dp"
-            app:layout_anchorGravity="bottom|end"
+            android:layout_width="@dimen/fab_size"
+            android:layout_height="@dimen/fab_size"
             android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            app:elevation="@dimen/material_elevation_fab_resting"
+            app:layout_anchorGravity="bottom|end"
+            app:pressedTranslationZ="@dimen/material_elevation_fab_pressed"
             app:srcCompat="@drawable/ic_add" />
 
     </android.support.design.widget.CoordinatorLayout>

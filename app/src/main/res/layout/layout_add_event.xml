@@ -10,9 +10,9 @@
             android:id="@+id/addEvent_root_cardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/margin_double"
+            android:layout_marginStart="@dimen/margin_double"
+            android:layout_marginTop="@dimen/margin_default"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?android:attr/selectableItemBackground"
@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="8dp">
+                android:padding="@dimen/padding_default">
 
                 <android.support.v7.widget.AppCompatImageView
                     android:id="@+id/addEvent_add_imageView"
@@ -38,9 +38,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="@dimen/margin_default"
                     android:text="@string/addEvent_newEvent"
-                    android:textSize="16sp" />
+                    android:textSize="@dimen/text_title" />
 
             </LinearLayout>
         </android.support.v7.widget.CardView>
@@ -49,16 +49,17 @@
             android:id="@+id/addEvent_events_rv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/margin_default"
+            android:layout_marginStart="@dimen/margin_default"
+            android:layout_marginTop="@dimen/margin_default"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addEvent_root_cardView" />
 
+        <!-- This is necessary because dialog is ignoring bottom margin on recyclerView -->
         <Space
             android:layout_width="match_parent"
-            android:layout_height="8dp"
+            android:layout_height="@dimen/margin_default"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addEvent_events_rv" />
