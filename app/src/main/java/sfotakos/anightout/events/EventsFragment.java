@@ -72,16 +72,25 @@ public class EventsFragment extends Fragment {
     }
 
     private void setupEventRv() {
-        mBinding.eventRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
-            @Override
-            public void eventClicked(Event event) {
-                Intent eventDetailsIntent = new Intent(getActivity(), EventDetailsActivity.class);
-                eventDetailsIntent.putExtra(EventDetailsActivity.EVENT_EXTRA, event);
-                eventDetailsIntent.setAction(HomeActivity.HOME_ACTIVITY_PARENT);
-                startActivity(eventDetailsIntent);
-            }
-        }, queryEvents()));
-        mBinding.eventRv.setLayoutManager(new LinearLayoutManager(getContext()));
+        List<Event>  eventList = queryEvents();
+        if (eventList != null && eventList.size() > 0) {
+            mBinding.eventRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
+                @Override
+                public void eventClicked(Event event) {
+                    Intent eventDetailsIntent = new Intent(getActivity(), EventDetailsActivity.class);
+                    eventDetailsIntent.putExtra(EventDetailsActivity.EVENT_EXTRA, event);
+                    eventDetailsIntent.setAction(HomeActivity.HOME_ACTIVITY_PARENT);
+                    startActivity(eventDetailsIntent);
+                }
+            }, queryEvents()));
+            mBinding.eventRv.setLayoutManager(new LinearLayoutManager(getContext()));
+
+            mBinding.eventNoEventTextView.setVisibility(View.GONE);
+            mBinding.eventRv.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.eventNoEventTextView.setVisibility(View.VISIBLE);
+            mBinding.eventRv.setVisibility(View.GONE);
+        }
     }
 
     // TODO this is duplicated
