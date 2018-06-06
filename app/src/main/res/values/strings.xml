@@ -1,14 +1,22 @@
 <resources>
     <string name="app_name">A Night Out</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
 
     <string name="newEvent_eventName_hint">Event name</string>
     <string name="newEvent_eventDescription_label">Event description</string>
     <string name="newEvent_save">Save</string>
-    <string name="newEvent_toolbarTitle">New Event</string>
-    <string name="details_menuItem_share_title">Share</string>
-    <string name="details_menuItem_delete_title">Delete event</string>
+    <string name="newEvent_toolbarTitle">New event</string>
+
+    <string name="eventDetails_menuItem_share_title">Share</string>
+    <string name="eventDetails_menuItem_delete_title">Delete event</string>
+
+    <string name="placeDetails_addToEvent">Add to event</string>
+
+    <string name="eventsFragment_noCurrentEvent">You currently have no event, try creating one!</string>
+
+    <string name="any_cancel">Cancel</string>
+    <string name="any_search">Search</string>
+
+    <string name="addEvent_newEvent">New event</string>
+
+    <string name="any_distanceWithMeters">%d m</string>
 </resources>

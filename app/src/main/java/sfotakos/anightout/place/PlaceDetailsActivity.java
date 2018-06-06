@@ -32,7 +32,6 @@ import sfotakos.anightout.newevent.NewEventActivity;
 //TODO query place details and fill layout with more information
 public class PlaceDetailsActivity extends AppCompatActivity {
 
-    // TODO better name
     public final static String PLACE_EXTRA = "PLACEDETAILS_EXTRA";
     public static final String PLACE_DETAILS_ACTIVITY_PARENT = "place-details-activity";
 

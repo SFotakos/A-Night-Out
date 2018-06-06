@@ -48,7 +48,6 @@ public class EventDetailsActivity extends AppCompatActivity {
 
     public final static int WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 28145;
 
-    // TODO better name
     public final static String EVENT_EXTRA = "EVENTDETAILS_EVENT";
 
     private ActivityEventDetailsBinding mBinding;

@@ -17,7 +17,7 @@
         <TextView
             android:id="@+id/event_noEvent_textView"
             android:layout_gravity="center"
-            android:text="You currently have no event, try creating one!"
+            android:text="@string/eventsFragment_noCurrentEvent"
             android:textColor="@android:color/darker_gray"
             android:textSize="16sp"
             android:layout_width="wrap_content"

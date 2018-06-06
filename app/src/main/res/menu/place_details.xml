@@ -2,11 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO turn into string res -->
     <item
         android:id="@+id/action_add_to_event"
         android:icon="@drawable/ic_add"
         android:orderInCategory="1"
-        android:title="Add to event"
+        android:title="@string/placeDetails_addToEvent"
         app:showAsAction="always" />
 </menu>

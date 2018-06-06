@@ -5,14 +5,14 @@
     <item
         android:id="@+id/detailsAction_share"
         android:icon="@drawable/ic_share"
-        android:title="@string/details_menuItem_share_title"
+        android:title="@string/eventDetails_menuItem_share_title"
         app:iconTint="@android:color/white"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/detailsAction_delete"
         android:icon="@drawable/ic_delete"
-        android:title="@string/details_menuItem_delete_title"
+        android:title="@string/eventDetails_menuItem_delete_title"
         app:iconTint="@android:color/white"
         app:showAsAction="always" />
 

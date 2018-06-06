@@ -297,7 +297,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 int progressWithOffset = progress + MIN_SEARCH_RADIUS;
-                mBinding.mapFilter.filterDistanceTextView.setText(progressWithOffset + " m");
+                mBinding.mapFilter.filterDistanceTextView.setText(
+                        getResources().getString(R.string.any_distanceWithMeters, progressWithOffset));
                 safeRemoveCircle();
                 setSearchCircle(progressWithOffset);
             }
@@ -466,7 +467,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private void setupFragment() {
-        mBinding.mapFilter.filterDistanceTextView.setText(MIN_SEARCH_RADIUS + " m");
+        mBinding.mapFilter.filterDistanceTextView.setText(
+                getResources().getString(R.string.any_distanceWithMeters, MIN_SEARCH_RADIUS));
 
         List<Integer> iconResList = new ArrayList<>();
         final List<String> placeDescriptionList = new ArrayList<>();
