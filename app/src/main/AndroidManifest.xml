@@ -36,7 +36,8 @@
         </activity>
         <activity
             android:name=".newevent.NewEventActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity
             android:name=".eventdetails.EventDetailsActivity"
             android:screenOrientation="portrait" />
