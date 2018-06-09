@@ -73,7 +73,6 @@ public class NewEventActivity extends AppCompatActivity {
         return this.getNavigationUpIntent();
     }
 
-
     private void setupEventTimeField() {
         mBinding.newEventTimeEditText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,6 +129,8 @@ public class NewEventActivity extends AppCompatActivity {
                             mBinding.newEventNameInputEditText.getText().toString());
                     contentValues.put(EventEntry.EVENT_DATE,
                             mBinding.newEventDateEditText.getText().toString());
+                    contentValues.put(EventEntry.EVENT_TIME,
+                            mBinding.newEventTimeEditText.getText().toString());
                     contentValues.put(EventEntry.EVENT_DESCRIPTION,
                             mBinding.newEventDescriptionInputEditText.getText().toString());
 

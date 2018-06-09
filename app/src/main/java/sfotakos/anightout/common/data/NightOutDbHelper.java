@@ -10,7 +10,7 @@ public class NightOutDbHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "nightout.db";
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public NightOutDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -27,6 +27,7 @@ public class NightOutDbHelper extends SQLiteOpenHelper {
 
                         EventEntry.EVENT_NAME + " TEXT, " +
                         EventEntry.EVENT_DATE + " TEXT," +
+                        EventEntry.EVENT_TIME + " TEXT," +
                         EventEntry.EVENT_DESCRIPTION + " TEXT, " +
 
                         EventEntry.PLACE_ID + " TEXT, " +

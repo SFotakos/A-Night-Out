@@ -109,6 +109,7 @@ public class EventsFragment extends Fragment {
                 int eventIdIndex = cursor.getColumnIndex(EventEntry.EVENT_ID);
                 int eventNameIndex = cursor.getColumnIndex(EventEntry.EVENT_NAME);
                 int eventDateIndex = cursor.getColumnIndex(EventEntry.EVENT_DATE);
+                int eventTimeIndex = cursor.getColumnIndex(EventEntry.EVENT_TIME);
                 int eventDescriptionIndex = cursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
 
                 int placeIdIndex = cursor.getColumnIndex(EventEntry.PLACE_ID);
@@ -120,6 +121,7 @@ public class EventsFragment extends Fragment {
                 event.setEventId((cursor.getInt(eventIdIndex)));
                 event.setEventName(cursor.getString(eventNameIndex));
                 event.setEventDate(cursor.getString(eventDateIndex));
+                event.setEventTime(cursor.getString(eventTimeIndex));
                 event.setEventDescription(cursor.getString(eventDescriptionIndex));
 
                 Place place = new Place();

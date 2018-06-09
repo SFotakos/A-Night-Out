@@ -9,6 +9,7 @@ public class Event implements Serializable {
     private Integer eventId;
     private String eventName;
     private String eventDate;
+    private String eventTime;
     private String eventDescription;
 
     private Place place;
@@ -35,6 +36,14 @@ public class Event implements Serializable {
 
     public void setEventDate(String eventDate) {
         this.eventDate = eventDate;
+    }
+
+    public String getEventTime() {
+        return eventTime;
+    }
+
+    public void setEventTime(String eventTime) {
+        this.eventTime = eventTime;
     }
 
     public String getEventDescription() {

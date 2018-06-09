@@ -170,6 +170,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                 int eventIdIndex = cursor.getColumnIndex(EventEntry.EVENT_ID);
                 int eventNameIndex = cursor.getColumnIndex(EventEntry.EVENT_NAME);
                 int eventDateIndex = cursor.getColumnIndex(EventEntry.EVENT_DATE);
+                int eventTimeIndex = cursor.getColumnIndex(EventEntry.EVENT_TIME);
                 int eventDescriptionIndex = cursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
 
                 int placeNameIndex = cursor.getColumnIndex(EventEntry.PLACE_NAME);
@@ -179,6 +180,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                 event.setEventId((cursor.getInt(eventIdIndex)));
                 event.setEventName(cursor.getString(eventNameIndex));
                 event.setEventDate(cursor.getString(eventDateIndex));
+                event.setEventTime(cursor.getString(eventTimeIndex));
                 event.setEventDescription(cursor.getString(eventDescriptionIndex));
 
                 Place place = new Place();
@@ -236,6 +238,8 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     eventByIdCursor.getColumnIndex(EventEntry.EVENT_NAME);
             int eventDateIndex =
                     eventByIdCursor.getColumnIndex(EventEntry.EVENT_DATE);
+            int eventTimeIndex =
+                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_TIME);
             int eventDescriptionIndex =
                     eventByIdCursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
 
@@ -245,6 +249,8 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     eventByIdCursor.getString(eventNameIndex));
             contentValues.put(EventEntry.EVENT_DATE,
                     eventByIdCursor.getString(eventDateIndex));
+            contentValues.put(EventEntry.EVENT_TIME,
+                    eventByIdCursor.getString(eventTimeIndex));
             contentValues.put(EventEntry.EVENT_DESCRIPTION,
                     eventByIdCursor.getString(eventDescriptionIndex));
 
