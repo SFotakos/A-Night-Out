@@ -166,10 +166,13 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                                         mPlace.getPlaceId());
                                 contentValues.put(EventEntry.PLACE_NAME,
                                         mPlace.getName());
-                                contentValues.put(EventEntry.PLACE_PRICE_RANGE,
-                                        mPlace.getPriceLevel());
                                 contentValues.put(EventEntry.PLACE_ADDRESS,
                                         mPlace.getVicinity());
+
+                                if (mPlace.getPriceLevel() != null) {
+                                    contentValues.put(EventEntry.PLACE_PRICE_RANGE,
+                                            mPlace.getPriceLevel());
+                                }
 
                                 if (mPlace.getPhotos() != null && mPlace.getPhotos().size() > 0) {
                                     contentValues.put(EventEntry.PLACE_PHOTO_REF,
