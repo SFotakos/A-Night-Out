@@ -32,6 +32,7 @@ import static sfotakos.anightout.place.PlaceDetailsActivity.PLACE_DETAILS_ACTIVI
 // TODO implement entry validation
 public class NewEventActivity extends AppCompatActivity {
 
+    private final static int EVENT_NAME_MIN_LENGTH = 5;
     public final static String SAVED_EVENT_ID_EXTRA = "SAVED EVENT ID EXTRA";
 
     private ActivityNewEventBinding mBinding;
@@ -49,6 +50,10 @@ public class NewEventActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        setupActivity();
+    }
+
+    private void setupActivity() {
         setupEventDateField();
         setupSaveButton();
     }
@@ -104,29 +109,45 @@ public class NewEventActivity extends AppCompatActivity {
         mBinding.newEventSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ContentValues contentValues = new ContentValues();
+                if (isUserInputValid()) {
+                    ContentValues contentValues = new ContentValues();
 
-                contentValues.put(EventEntry.EVENT_NAME,
-                        mBinding.newEventNameInputEditText.getText().toString());
-                contentValues.put(EventEntry.EVENT_DATE,
-                        mBinding.newEventDateEditText.getText().toString());
-                contentValues.put(EventEntry.EVENT_DESCRIPTION,
-                        mBinding.newEventDescriptionInputEditText.getText().toString());
+                    contentValues.put(EventEntry.EVENT_NAME,
+                            mBinding.newEventNameInputEditText.getText().toString());
+                    contentValues.put(EventEntry.EVENT_DATE,
+                            mBinding.newEventDateEditText.getText().toString());
+                    contentValues.put(EventEntry.EVENT_DESCRIPTION,
+                            mBinding.newEventDescriptionInputEditText.getText().toString());
 
-                Uri uri = getContentResolver()
-                        .insert(EventEntry.CONTENT_URI, contentValues);
+                    Uri uri = getContentResolver()
+                            .insert(EventEntry.CONTENT_URI, contentValues);
 
-                if (uri != null) {
+                    if (uri != null) {
 
-                    returnToCallerWithCreatedEventId(ContentUris.parseId(uri));
-                } else {
-                    Toast.makeText(
-                            v.getContext(),
-                            "There was a problem saving the event, please try again",
-                            Toast.LENGTH_LONG).show();
+                        returnToCallerWithCreatedEventId(ContentUris.parseId(uri));
+                    } else {
+                        // TODO treat this better or at least put the string into strings.xml
+                        Toast.makeText(
+                                v.getContext(),
+                                "There was a problem saving the event, please try again",
+                                Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
+    }
+
+    private boolean isUserInputValid() {
+        if (mBinding.newEventNameInputEditText.getText().length() < EVENT_NAME_MIN_LENGTH) {
+            mBinding.newEventNameInputLayout.setErrorEnabled(true);
+            mBinding.newEventNameInputLayout.setError(
+                    getString(R.string.newEvent_eventName_invalidInput, EVENT_NAME_MIN_LENGTH));
+            return false;
+        } else {
+            mBinding.newEventNameInputLayout.setErrorEnabled(false);
+            mBinding.newEventNameInputLayout.setError(null);
+            return true;
+        }
     }
 
     private Intent getNavigationUpIntent() {

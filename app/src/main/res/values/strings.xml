@@ -5,6 +5,7 @@
     <string name="newEvent_eventDescription_label">Event description</string>
     <string name="newEvent_save">Save</string>
     <string name="newEvent_toolbarTitle">New event</string>
+    <string name="newEvent_eventName_invalidInput">Event name has to be at least %d characters long</string>
 
     <string name="eventDetails_menuItem_share_title">Share</string>
     <string name="eventDetails_menuItem_delete_title">Delete event</string>
