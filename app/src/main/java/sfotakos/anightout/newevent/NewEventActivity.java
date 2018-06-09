@@ -2,6 +2,7 @@ package sfotakos.anightout.newevent;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -13,12 +14,12 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.security.InvalidParameterException;
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.data.NightOutContract.EventEntry;
@@ -54,7 +55,9 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
     private void setupActivity() {
+        updateEventDateTimeFields();
         setupEventDateField();
+        setupEventTimeField();
         setupSaveButton();
     }
 
@@ -70,39 +73,50 @@ public class NewEventActivity extends AppCompatActivity {
         return this.getNavigationUpIntent();
     }
 
-    // TODO Add custom view for date and time picking
-    // Temporary implementation as seen on https://stackoverflow.com/a/19897981
+
+    private void setupEventTimeField() {
+        mBinding.newEventTimeEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new TimePickerDialog(NewEventActivity.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                                myCalendar.set(Calendar.HOUR_OF_DAY, hour);
+                                myCalendar.set(Calendar.MINUTE, minute);
+                                updateEventDateTimeFields();
+                            }
+                        }, myCalendar.get(Calendar.HOUR_OF_DAY), myCalendar.get(Calendar.MINUTE),
+                        true).show();
+            }
+        });
+    }
+
     private void setupEventDateField() {
-        updateEventDateField();
-
-        final DatePickerDialog.OnDateSetListener date = new
-                DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                          int dayOfMonth) {
-                        myCalendar.set(Calendar.YEAR, year);
-                        myCalendar.set(Calendar.MONTH, monthOfYear);
-                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        updateEventDateField();
-                    }
-
-                };
-
         mBinding.newEventDateEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new DatePickerDialog(NewEventActivity.this, date, myCalendar
+                new DatePickerDialog(NewEventActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                                myCalendar.set(Calendar.YEAR, year);
+                                myCalendar.set(Calendar.MONTH, month);
+                                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                                updateEventDateTimeFields();
+                            }
+                        }, myCalendar
                         .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                         myCalendar.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
     }
 
-    private void updateEventDateField() {
-        String myFormat = "dd/MM/yyyy HH:mm:ss"; //In which you need put here
-        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.getDefault());
-
-        mBinding.newEventDateEditText.setText(sdf.format(myCalendar.getTime()));
+    private void updateEventDateTimeFields() {
+        mBinding.newEventDateEditText.setText(
+                DateFormat.getDateInstance(DateFormat.SHORT).format(myCalendar.getTime()));
+        mBinding.newEventTimeEditText.setText(
+                DateFormat.getTimeInstance(DateFormat.SHORT).format(myCalendar.getTime()));
     }
 
     private void setupSaveButton() {
@@ -123,7 +137,6 @@ public class NewEventActivity extends AppCompatActivity {
                             .insert(EventEntry.CONTENT_URI, contentValues);
 
                     if (uri != null) {
-
                         returnToCallerWithCreatedEventId(ContentUris.parseId(uri));
                     } else {
                         // TODO treat this better or at least put the string into strings.xml

@@ -6,6 +6,8 @@
     <string name="newEvent_save">Save</string>
     <string name="newEvent_toolbarTitle">New event</string>
     <string name="newEvent_eventName_invalidInput">Event name has to be at least %d characters long</string>
+    <string name="newEvent_eventDatePickerDialog_title">Select event date</string>
+    <string name="newEvent_eventTimePickerDialog_title">Select event time</string>
 
     <string name="eventDetails_menuItem_share_title">Share</string>
     <string name="eventDetails_menuItem_delete_title">Delete event</string>
