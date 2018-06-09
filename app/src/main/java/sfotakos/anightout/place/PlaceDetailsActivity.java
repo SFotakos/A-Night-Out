@@ -1,5 +1,6 @@
 package sfotakos.anightout.place;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -34,6 +35,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
 
     public final static String PLACE_EXTRA = "PLACEDETAILS_EXTRA";
     public static final String PLACE_DETAILS_ACTIVITY_PARENT = "place-details-activity";
+    private static final int NEW_EVENT_RESULT_CODE = 20194;
 
     private ActivityPlaceDetailsBinding mBinding;
     private AlertDialog mEventsDialog;
@@ -119,7 +121,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     Intent newEventIntent =
                             new Intent(PlaceDetailsActivity.this, NewEventActivity.class);
                     newEventIntent.setAction(PLACE_DETAILS_ACTIVITY_PARENT);
-                    startActivity(newEventIntent);
+                    startActivityForResult(newEventIntent, NEW_EVENT_RESULT_CODE);
 
                     if (mEventsDialog != null) {
                         mEventsDialog.dismiss();
@@ -131,64 +133,13 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     .setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
                         @Override
                         public void eventClicked(Event event) {
-                            Uri eventByIdUri = EventEntry.CONTENT_URI.buildUpon()
-                                    .appendPath(String.valueOf(event.getEventId())).build();
-                            Cursor eventByIdCursor = getContentResolver().query(
-                                    eventByIdUri,
-                                    null,
-                                    null,
-                                    null,
-                                    null);
 
-                            if ((eventByIdCursor != null && eventByIdCursor.getCount() != 0)) {
-                                eventByIdCursor.moveToFirst();
-                                ContentValues contentValues = new ContentValues();
-
-                                int eventIdIndex =
-                                        eventByIdCursor.getColumnIndex(EventEntry.EVENT_ID);
-                                int eventNameIndex =
-                                        eventByIdCursor.getColumnIndex(EventEntry.EVENT_NAME);
-                                int eventDateIndex =
-                                        eventByIdCursor.getColumnIndex(EventEntry.EVENT_DATE);
-                                int eventDescriptionIndex =
-                                        eventByIdCursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
-
-                                contentValues.put(EventEntry.EVENT_ID,
-                                        eventByIdCursor.getInt(eventIdIndex));
-                                contentValues.put(EventEntry.EVENT_NAME,
-                                        eventByIdCursor.getString(eventNameIndex));
-                                contentValues.put(EventEntry.EVENT_DATE,
-                                        eventByIdCursor.getString(eventDateIndex));
-                                contentValues.put(EventEntry.EVENT_DESCRIPTION,
-                                        eventByIdCursor.getString(eventDescriptionIndex));
-
-                                contentValues.put(EventEntry.PLACE_ID,
-                                        mPlace.getPlaceId());
-                                contentValues.put(EventEntry.PLACE_NAME,
-                                        mPlace.getName());
-                                contentValues.put(EventEntry.PLACE_ADDRESS,
-                                        mPlace.getVicinity());
-
-                                if (mPlace.getPriceLevel() != null) {
-                                    contentValues.put(EventEntry.PLACE_PRICE_RANGE,
-                                            mPlace.getPriceLevel());
-                                }
-
-                                if (mPlace.getPhotos() != null && mPlace.getPhotos().size() > 0) {
-                                    contentValues.put(EventEntry.PLACE_PHOTO_REF,
-                                            mPlace.getPhotos().get(0).getPhotoReference());
-                                }
-
-                                getContentResolver().update(eventByIdUri, contentValues,
-                                        null, null);
-
-                                eventByIdCursor.close();
-
-                                if (mEventsDialog != null) {
-                                    mEventsDialog.dismiss();
-                                }
+                            updateEventWithPlace(Integer.toString(event.getEventId()));
+                            if (mEventsDialog != null) {
+                                mEventsDialog.dismiss();
                             }
                         }
+
                     }, queryEvents()));
             dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -197,7 +148,10 @@ public class PlaceDetailsActivity extends AppCompatActivity {
             return true;
         }
 
-        return super.onOptionsItemSelected(item);
+        return super.
+
+                onOptionsItemSelected(item);
+
     }
 
     // TODO this is duplicated
@@ -238,5 +192,83 @@ public class PlaceDetailsActivity extends AppCompatActivity {
             cursor.close();
         }
         return eventList;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == NEW_EVENT_RESULT_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                long eventId = data.getLongExtra(NewEventActivity.SAVED_EVENT_ID_EXTRA, -1);
+                if (eventId != -1){
+                    updateEventWithPlace(Long.toString(eventId));
+                }
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private Uri getEventByIdUri(String eventId) {
+        return EventEntry.CONTENT_URI.buildUpon()
+                .appendPath(eventId).build();
+    }
+
+    private Cursor queryEventById(String eventId) {
+        return getContentResolver().query(
+                getEventByIdUri(eventId),
+                null,
+                null,
+                null,
+                null);
+    }
+
+    private void updateEventWithPlace(String eventId) {
+        Cursor eventByIdCursor =
+                queryEventById(eventId);
+
+        if ((eventByIdCursor != null && eventByIdCursor.getCount() != 0)) {
+            eventByIdCursor.moveToFirst();
+            ContentValues contentValues = new ContentValues();
+
+            int eventIdIndex =
+                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_ID);
+            int eventNameIndex =
+                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_NAME);
+            int eventDateIndex =
+                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_DATE);
+            int eventDescriptionIndex =
+                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
+
+            contentValues.put(EventEntry.EVENT_ID,
+                    eventByIdCursor.getInt(eventIdIndex));
+            contentValues.put(EventEntry.EVENT_NAME,
+                    eventByIdCursor.getString(eventNameIndex));
+            contentValues.put(EventEntry.EVENT_DATE,
+                    eventByIdCursor.getString(eventDateIndex));
+            contentValues.put(EventEntry.EVENT_DESCRIPTION,
+                    eventByIdCursor.getString(eventDescriptionIndex));
+
+            contentValues.put(EventEntry.PLACE_ID,
+                    mPlace.getPlaceId());
+            contentValues.put(EventEntry.PLACE_NAME,
+                    mPlace.getName());
+            contentValues.put(EventEntry.PLACE_ADDRESS,
+                    mPlace.getVicinity());
+
+            if (mPlace.getPriceLevel() != null) {
+                contentValues.put(EventEntry.PLACE_PRICE_RANGE,
+                        mPlace.getPriceLevel());
+            }
+
+            if (mPlace.getPhotos() != null && mPlace.getPhotos().size() > 0) {
+                contentValues.put(EventEntry.PLACE_PHOTO_REF,
+                        mPlace.getPhotos().get(0).getPhotoReference());
+            }
+
+            getContentResolver().update(getEventByIdUri(eventId), contentValues,
+                    null, null);
+
+            eventByIdCursor.close();
+        }
     }
 }

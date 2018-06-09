@@ -1,6 +1,8 @@
 package sfotakos.anightout.newevent;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -29,6 +31,8 @@ import static sfotakos.anightout.place.PlaceDetailsActivity.PLACE_DETAILS_ACTIVI
 
 // TODO implement entry validation
 public class NewEventActivity extends AppCompatActivity {
+
+    public final static String SAVED_EVENT_ID_EXTRA = "SAVED EVENT ID EXTRA";
 
     private ActivityNewEventBinding mBinding;
 
@@ -113,7 +117,8 @@ public class NewEventActivity extends AppCompatActivity {
                         .insert(EventEntry.CONTENT_URI, contentValues);
 
                 if (uri != null) {
-                    onNavigateUp();
+
+                    returnToCallerWithCreatedEventId(ContentUris.parseId(uri));
                 } else {
                     Toast.makeText(
                             v.getContext(),
@@ -143,5 +148,13 @@ public class NewEventActivity extends AppCompatActivity {
             }
         }
         return navigationIntent;
+    }
+
+    private void returnToCallerWithCreatedEventId(long eventId) {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra(SAVED_EVENT_ID_EXTRA, eventId);
+        setResult(Activity.RESULT_OK, returnIntent);
+
+        onNavigateUp();
     }
 }
