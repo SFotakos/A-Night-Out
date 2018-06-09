@@ -435,6 +435,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 false);
                         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
                         isRequestLocationUpdatesActive = false;
+
+                        mBinding.mapCenterPositionImageButton.setVisibility(View.VISIBLE);
                     }
                 }
             };
@@ -534,6 +536,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 getResources().getColor(android.R.color.white) :
                                 getResources().getColor(android.R.color.darker_gray),
                         PorterDuff.Mode.SRC_ATOP);
+            }
+        });
+
+        mBinding.mapCenterPositionImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getUserLastKnownLocationWithChecks();
             }
         });
 
