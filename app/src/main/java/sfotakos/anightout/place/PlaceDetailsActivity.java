@@ -1,9 +1,7 @@
 package sfotakos.anightout.place;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,7 +19,6 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.NetworkUtil;
-import sfotakos.anightout.common.data.NightOutContract.EventEntry;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
@@ -95,14 +92,12 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                 } else {
                     mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
                 }
-
             }
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.place_details, menu);
         return true;
     }
@@ -133,67 +128,21 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     .setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
                         @Override
                         public void eventClicked(Event event) {
-
-                            updateEventWithPlace(Integer.toString(event.getEventId()));
+                            Event.updateEventWithPlace(getContentResolver(),
+                                    Long.toString(event.getEventId()), mPlace);
                             if (mEventsDialog != null) {
                                 mEventsDialog.dismiss();
                             }
                         }
 
-                    }, queryEvents()));
+                    }, Event.queryEvents(getContentResolver())));
             dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(this));
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             mEventsDialog = builder.setTitle("Add to event").setView(dialogBinding.getRoot()).show();
             return true;
         }
-
-        return super.
-
-                onOptionsItemSelected(item);
-
-    }
-
-    // TODO this is duplicated
-    private List<Event> queryEvents() {
-        List<Event> eventList = new ArrayList<>();
-        Cursor cursor = getContentResolver().query(
-                EventEntry.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                Event event = new Event();
-                int eventIdIndex = cursor.getColumnIndex(EventEntry.EVENT_ID);
-                int eventNameIndex = cursor.getColumnIndex(EventEntry.EVENT_NAME);
-                int eventDateIndex = cursor.getColumnIndex(EventEntry.EVENT_DATE);
-                int eventTimeIndex = cursor.getColumnIndex(EventEntry.EVENT_TIME);
-                int eventDescriptionIndex = cursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
-
-                int placeNameIndex = cursor.getColumnIndex(EventEntry.PLACE_NAME);
-                int placePriceRangeIndex = cursor.getColumnIndex(EventEntry.PLACE_PRICE_RANGE);
-                int placeAddressIndex = cursor.getColumnIndex(EventEntry.PLACE_ADDRESS);
-
-                event.setEventId((cursor.getInt(eventIdIndex)));
-                event.setEventName(cursor.getString(eventNameIndex));
-                event.setEventDate(cursor.getString(eventDateIndex));
-                event.setEventTime(cursor.getString(eventTimeIndex));
-                event.setEventDescription(cursor.getString(eventDescriptionIndex));
-
-                Place place = new Place();
-                place.setName(cursor.getString(placeNameIndex));
-                place.setPriceLevel(cursor.getInt(placePriceRangeIndex));
-                place.setVicinity(cursor.getString(placeAddressIndex));
-
-                event.setPlace(place);
-                eventList.add(event);
-            }
-            cursor.close();
-        }
-        return eventList;
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -201,80 +150,11 @@ public class PlaceDetailsActivity extends AppCompatActivity {
         if (requestCode == NEW_EVENT_RESULT_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 long eventId = data.getLongExtra(NewEventActivity.SAVED_EVENT_ID_EXTRA, -1);
-                if (eventId != -1){
-                    updateEventWithPlace(Long.toString(eventId));
+                if (eventId != -1) {
+                    Event.updateEventWithPlace(getContentResolver(), Long.toString(eventId), mPlace);
                 }
             }
         }
-
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private Uri getEventByIdUri(String eventId) {
-        return EventEntry.CONTENT_URI.buildUpon()
-                .appendPath(eventId).build();
-    }
-
-    private Cursor queryEventById(String eventId) {
-        return getContentResolver().query(
-                getEventByIdUri(eventId),
-                null,
-                null,
-                null,
-                null);
-    }
-
-    private void updateEventWithPlace(String eventId) {
-        Cursor eventByIdCursor =
-                queryEventById(eventId);
-
-        if ((eventByIdCursor != null && eventByIdCursor.getCount() != 0)) {
-            eventByIdCursor.moveToFirst();
-            ContentValues contentValues = new ContentValues();
-
-            int eventIdIndex =
-                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_ID);
-            int eventNameIndex =
-                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_NAME);
-            int eventDateIndex =
-                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_DATE);
-            int eventTimeIndex =
-                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_TIME);
-            int eventDescriptionIndex =
-                    eventByIdCursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
-
-            contentValues.put(EventEntry.EVENT_ID,
-                    eventByIdCursor.getInt(eventIdIndex));
-            contentValues.put(EventEntry.EVENT_NAME,
-                    eventByIdCursor.getString(eventNameIndex));
-            contentValues.put(EventEntry.EVENT_DATE,
-                    eventByIdCursor.getString(eventDateIndex));
-            contentValues.put(EventEntry.EVENT_TIME,
-                    eventByIdCursor.getString(eventTimeIndex));
-            contentValues.put(EventEntry.EVENT_DESCRIPTION,
-                    eventByIdCursor.getString(eventDescriptionIndex));
-
-            contentValues.put(EventEntry.PLACE_ID,
-                    mPlace.getPlaceId());
-            contentValues.put(EventEntry.PLACE_NAME,
-                    mPlace.getName());
-            contentValues.put(EventEntry.PLACE_ADDRESS,
-                    mPlace.getVicinity());
-
-            if (mPlace.getPriceLevel() != null) {
-                contentValues.put(EventEntry.PLACE_PRICE_RANGE,
-                        mPlace.getPriceLevel());
-            }
-
-            if (mPlace.getPhotos() != null && mPlace.getPhotos().size() > 0) {
-                contentValues.put(EventEntry.PLACE_PHOTO_REF,
-                        mPlace.getPhotos().get(0).getPhotoReference());
-            }
-
-            getContentResolver().update(getEventByIdUri(eventId), contentValues,
-                    null, null);
-
-            eventByIdCursor.close();
-        }
     }
 }

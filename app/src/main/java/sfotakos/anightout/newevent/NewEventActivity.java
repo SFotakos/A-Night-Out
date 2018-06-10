@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
@@ -22,7 +21,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 
 import sfotakos.anightout.R;
-import sfotakos.anightout.common.data.NightOutContract.EventEntry;
+import sfotakos.anightout.common.Event;
 import sfotakos.anightout.databinding.ActivityNewEventBinding;
 import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.place.PlaceDetailsActivity;
@@ -123,22 +122,16 @@ public class NewEventActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (isUserInputValid()) {
-                    ContentValues contentValues = new ContentValues();
-
-                    contentValues.put(EventEntry.EVENT_NAME,
-                            mBinding.newEventNameInputEditText.getText().toString());
-                    contentValues.put(EventEntry.EVENT_DATE,
-                            mBinding.newEventDateEditText.getText().toString());
-                    contentValues.put(EventEntry.EVENT_TIME,
-                            mBinding.newEventTimeEditText.getText().toString());
-                    contentValues.put(EventEntry.EVENT_DESCRIPTION,
+                    Event newEvent = new Event();
+                    newEvent.setEventName(mBinding.newEventNameInputEditText.getText().toString());
+                    newEvent.setEventDate(mBinding.newEventDateEditText.getText().toString());
+                    newEvent.setEventTime(mBinding.newEventTimeEditText.getText().toString());
+                    newEvent.setEventDescription(
                             mBinding.newEventDescriptionInputEditText.getText().toString());
 
-                    Uri uri = getContentResolver()
-                            .insert(EventEntry.CONTENT_URI, contentValues);
-
-                    if (uri != null) {
-                        returnToCallerWithCreatedEventId(ContentUris.parseId(uri));
+                    Uri insertedUri = Event.insertEvent(getContentResolver(), newEvent);
+                    if (insertedUri != null) {
+                        returnToCallerWithCreatedEventId(ContentUris.parseId(insertedUri));
                     } else {
                         // TODO treat this better or at least put the string into strings.xml
                         Toast.makeText(

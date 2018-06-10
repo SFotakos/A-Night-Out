@@ -34,7 +34,6 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.NetworkUtil;
-import sfotakos.anightout.common.data.NightOutContract;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityEventDetailsBinding;
@@ -158,10 +157,8 @@ public class EventDetailsActivity extends AppCompatActivity {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            Uri eventByIdUri = NightOutContract.EventEntry.CONTENT_URI.buildUpon()
-                                    .appendPath(String.valueOf(mEvent.getEventId())).build();
-
-                            getContentResolver().delete(eventByIdUri, null, null);
+                            Event.deleteEvent(getContentResolver(),
+                                    Integer.toString(mEvent.getEventId()));
                             onNavigateUp();
                         }
                     });

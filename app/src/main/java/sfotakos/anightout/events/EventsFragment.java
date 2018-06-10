@@ -1,7 +1,6 @@
 package sfotakos.anightout.events;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,14 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Event;
-import sfotakos.anightout.common.data.NightOutContract.EventEntry;
-import sfotakos.anightout.common.google_maps_places_photos_api.model.Photo;
-import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.FragmentEventBinding;
 import sfotakos.anightout.eventdetails.EventDetailsActivity;
 import sfotakos.anightout.home.HomeActivity;
@@ -72,7 +67,7 @@ public class EventsFragment extends Fragment {
     }
 
     private void setupEventRv() {
-        List<Event>  eventList = queryEvents();
+        List<Event>  eventList = Event.queryEvents(getActivity().getContentResolver());
         if (eventList != null && eventList.size() > 0) {
             mBinding.eventRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
                 @Override
@@ -82,7 +77,7 @@ public class EventsFragment extends Fragment {
                     eventDetailsIntent.setAction(HomeActivity.HOME_ACTIVITY_PARENT);
                     startActivity(eventDetailsIntent);
                 }
-            }, queryEvents()));
+            }, eventList));
             mBinding.eventRv.setLayoutManager(new LinearLayoutManager(getContext()));
 
             mBinding.eventNoEventTextView.setVisibility(View.GONE);
@@ -91,56 +86,5 @@ public class EventsFragment extends Fragment {
             mBinding.eventNoEventTextView.setVisibility(View.VISIBLE);
             mBinding.eventRv.setVisibility(View.GONE);
         }
-    }
-
-    // TODO this is duplicated
-    private List<Event> queryEvents() {
-        List<Event> eventList = new ArrayList<>();
-        Cursor cursor = getActivity().getContentResolver().query(
-                EventEntry.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                Event event = new Event();
-                int eventIdIndex = cursor.getColumnIndex(EventEntry.EVENT_ID);
-                int eventNameIndex = cursor.getColumnIndex(EventEntry.EVENT_NAME);
-                int eventDateIndex = cursor.getColumnIndex(EventEntry.EVENT_DATE);
-                int eventTimeIndex = cursor.getColumnIndex(EventEntry.EVENT_TIME);
-                int eventDescriptionIndex = cursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
-
-                int placeIdIndex = cursor.getColumnIndex(EventEntry.PLACE_ID);
-                int placeNameIndex = cursor.getColumnIndex(EventEntry.PLACE_NAME);
-                int placePhotoRefIndex = cursor.getColumnIndex(EventEntry.PLACE_PHOTO_REF);
-                int placePriceRangeIndex = cursor.getColumnIndex(EventEntry.PLACE_PRICE_RANGE);
-                int placeAddressIndex = cursor.getColumnIndex(EventEntry.PLACE_ADDRESS);
-
-                event.setEventId((cursor.getInt(eventIdIndex)));
-                event.setEventName(cursor.getString(eventNameIndex));
-                event.setEventDate(cursor.getString(eventDateIndex));
-                event.setEventTime(cursor.getString(eventTimeIndex));
-                event.setEventDescription(cursor.getString(eventDescriptionIndex));
-
-                Place place = new Place();
-                place.setId(cursor.getString(placeIdIndex));
-                place.setName(cursor.getString(placeNameIndex));
-                place.setPriceLevel(cursor.getInt(placePriceRangeIndex));
-                place.setVicinity(cursor.getString(placeAddressIndex));
-
-                List<Photo> photoList = new ArrayList<>();
-                Photo photo = new Photo();
-                photo.setPhotoReference(cursor.getString(placePhotoRefIndex));
-                photoList.add(photo);
-                place.setPhotos(photoList);
-
-                event.setPlace(place);
-                eventList.add(event);
-            }
-            cursor.close();
-        }
-        return eventList;
     }
 }
