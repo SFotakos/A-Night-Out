@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -37,15 +38,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.IconAndTextAdapter;
-import sfotakos.anightout.common.MapState;
 import sfotakos.anightout.common.MapHelper;
+import sfotakos.anightout.common.MapState;
 import sfotakos.anightout.common.TutorialUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.databinding.FragmentMapBinding;
@@ -110,16 +110,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         mMapHelper.getMapState().setCenterMarkerLatLng(mMapHelper.getMapState().getClickedLatLng());
-        outState.putSerializable(Constants.STATE_MAP, mMapHelper.getMapState());
+        outState.putParcelable(Constants.STATE_MAP, mMapHelper.getMapState());
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            Serializable serializable = savedInstanceState.getSerializable(Constants.STATE_MAP);
-            if (serializable != null && serializable instanceof MapState) {
-                mMapHelper.restoreMapState((MapState) serializable);
+            Parcelable parcelable = savedInstanceState.getParcelable(Constants.STATE_MAP);
+            if (parcelable != null && parcelable instanceof MapState) {
+                mMapHelper.restoreMapState((MapState) parcelable);
                 togglePriceFilteringViewState(mMapHelper.getMapState().isPriceSearchingEnabled());
                 if (mMapHelper.getMapState().isFilterEnabled()) {
                     showFilter();
