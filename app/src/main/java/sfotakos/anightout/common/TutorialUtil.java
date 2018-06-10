@@ -10,9 +10,6 @@ import co.mobiwise.materialintro.view.MaterialIntroView;
 
 public class TutorialUtil {
 
-    public static final String MAP_TUTORIAL_ID = "MAP TUTORIAL ID";
-    public static final String MAP_FILTER_PRICE_TUTORIAL_ID = "MAP FILTER PRICE TUTORIAL ID";
-
     public static void showDefaultTutorial(@NonNull Activity activity, View view, String infoText,
                                            String usageId, boolean shouldDisplayDot) {
         new MaterialIntroView.Builder(activity)

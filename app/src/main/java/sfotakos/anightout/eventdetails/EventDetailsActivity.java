@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.NetworkUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
@@ -40,14 +41,10 @@ import sfotakos.anightout.databinding.ActivityEventDetailsBinding;
 import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.place.PlaceDetailsActivity;
 
-import static sfotakos.anightout.home.HomeActivity.HOME_ACTIVITY_PARENT;
-import static sfotakos.anightout.place.PlaceDetailsActivity.PLACE_DETAILS_ACTIVITY_PARENT;
+import static sfotakos.anightout.common.Constants.HOME_ACTIVITY_PARENT;
+import static sfotakos.anightout.common.Constants.PLACE_DETAILS_ACTIVITY_PARENT;
 
 public class EventDetailsActivity extends AppCompatActivity {
-
-    public final static int WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 28145;
-
-    public final static String EVENT_EXTRA = "EVENTDETAILS_EVENT";
 
     private ActivityEventDetailsBinding mBinding;
     private Event mEvent;
@@ -60,8 +57,8 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            if (intent.hasExtra(EVENT_EXTRA)) {
-                mEvent = (Event) intent.getSerializableExtra(EVENT_EXTRA);
+            if (intent.hasExtra(Constants.EVENT_EXTRA)) {
+                mEvent = (Event) intent.getSerializableExtra(Constants.EVENT_EXTRA);
                 if (mEvent == null) {
                     throw new RuntimeException("Event data was not recovered properly");
                 }
@@ -191,7 +188,7 @@ public class EventDetailsActivity extends AppCompatActivity {
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
             // After permission was granted
-            case WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE: {
+            case Constants.WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     shareEvent();
@@ -243,7 +240,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     private void requestStoragePermission() {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE);
+                Constants.WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE);
     }
 
     private void shareEvent() {

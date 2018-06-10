@@ -21,19 +21,17 @@ import java.text.DateFormat;
 import java.util.Calendar;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.databinding.ActivityNewEventBinding;
 import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.place.PlaceDetailsActivity;
 
-import static sfotakos.anightout.home.HomeActivity.HOME_ACTIVITY_PARENT;
-import static sfotakos.anightout.place.PlaceDetailsActivity.PLACE_DETAILS_ACTIVITY_PARENT;
+import static sfotakos.anightout.common.Constants.HOME_ACTIVITY_PARENT;
+import static sfotakos.anightout.common.Constants.PLACE_DETAILS_ACTIVITY_PARENT;
 
 // TODO implement entry validation
 public class NewEventActivity extends AppCompatActivity {
-
-    private final static int EVENT_NAME_MIN_LENGTH = 5;
-    public final static String SAVED_EVENT_ID_EXTRA = "SAVED EVENT ID EXTRA";
 
     private ActivityNewEventBinding mBinding;
 
@@ -145,10 +143,10 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
     private boolean isUserInputValid() {
-        if (mBinding.newEventNameInputEditText.getText().length() < EVENT_NAME_MIN_LENGTH) {
+        if (mBinding.newEventNameInputEditText.getText().length() < Constants.EVENT_NAME_MIN_LENGTH) {
             mBinding.newEventNameInputLayout.setErrorEnabled(true);
             mBinding.newEventNameInputLayout.setError(
-                    getString(R.string.newEvent_eventName_invalidInput, EVENT_NAME_MIN_LENGTH));
+                    getString(R.string.newEvent_eventName_invalidInput, Constants.EVENT_NAME_MIN_LENGTH));
             return false;
         } else {
             mBinding.newEventNameInputLayout.setErrorEnabled(false);
@@ -180,7 +178,7 @@ public class NewEventActivity extends AppCompatActivity {
 
     private void returnToCallerWithCreatedEventId(long eventId) {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra(SAVED_EVENT_ID_EXTRA, eventId);
+        returnIntent.putExtra(Constants.SAVED_EVENT_ID_EXTRA, eventId);
         setResult(Activity.RESULT_OK, returnIntent);
 
         onNavigateUp();

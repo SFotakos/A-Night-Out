@@ -14,10 +14,10 @@ import android.view.ViewGroup;
 import java.util.List;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.databinding.FragmentEventBinding;
 import sfotakos.anightout.eventdetails.EventDetailsActivity;
-import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.newevent.NewEventActivity;
 
 public class EventsFragment extends Fragment {
@@ -54,7 +54,7 @@ public class EventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent newEventIntent = new Intent(getActivity(), NewEventActivity.class);
-                newEventIntent.setAction(HomeActivity.HOME_ACTIVITY_PARENT);
+                newEventIntent.setAction(Constants.HOME_ACTIVITY_PARENT);
                 startActivity(newEventIntent);
             }
         });
@@ -73,8 +73,8 @@ public class EventsFragment extends Fragment {
                 @Override
                 public void eventClicked(Event event) {
                     Intent eventDetailsIntent = new Intent(getActivity(), EventDetailsActivity.class);
-                    eventDetailsIntent.putExtra(EventDetailsActivity.EVENT_EXTRA, event);
-                    eventDetailsIntent.setAction(HomeActivity.HOME_ACTIVITY_PARENT);
+                    eventDetailsIntent.putExtra(Constants.EVENT_EXTRA, event);
+                    eventDetailsIntent.setAction(Constants.HOME_ACTIVITY_PARENT);
                     startActivity(eventDetailsIntent);
                 }
             }, eventList));

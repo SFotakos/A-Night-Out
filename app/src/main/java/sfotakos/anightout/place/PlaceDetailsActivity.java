@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.NetworkUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
@@ -29,10 +30,6 @@ import sfotakos.anightout.newevent.NewEventActivity;
 
 //TODO query place details and fill layout with more information
 public class PlaceDetailsActivity extends AppCompatActivity {
-
-    public final static String PLACE_EXTRA = "PLACEDETAILS_EXTRA";
-    public static final String PLACE_DETAILS_ACTIVITY_PARENT = "place-details-activity";
-    private static final int NEW_EVENT_RESULT_CODE = 20194;
 
     private ActivityPlaceDetailsBinding mBinding;
     private AlertDialog mEventsDialog;
@@ -51,8 +48,8 @@ public class PlaceDetailsActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            if (intent.hasExtra(PLACE_EXTRA)) {
-                mPlace = (Place) intent.getSerializableExtra(PLACE_EXTRA);
+            if (intent.hasExtra(Constants.PLACE_EXTRA)) {
+                mPlace = (Place) intent.getSerializableExtra(Constants.PLACE_EXTRA);
                 if (mPlace == null) {
                     throw new RuntimeException("Place data was not recovered properly");
                 }
@@ -115,8 +112,8 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent newEventIntent =
                             new Intent(PlaceDetailsActivity.this, NewEventActivity.class);
-                    newEventIntent.setAction(PLACE_DETAILS_ACTIVITY_PARENT);
-                    startActivityForResult(newEventIntent, NEW_EVENT_RESULT_CODE);
+                    newEventIntent.setAction(Constants.PLACE_DETAILS_ACTIVITY_PARENT);
+                    startActivityForResult(newEventIntent, Constants.NEW_EVENT_RESULT_CODE);
 
                     if (mEventsDialog != null) {
                         mEventsDialog.dismiss();
@@ -148,9 +145,9 @@ public class PlaceDetailsActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == NEW_EVENT_RESULT_CODE) {
+        if (requestCode == Constants.NEW_EVENT_RESULT_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                long eventId = data.getLongExtra(NewEventActivity.SAVED_EVENT_ID_EXTRA, -1);
+                long eventId = data.getLongExtra(Constants.SAVED_EVENT_ID_EXTRA, -1);
                 if (eventId != -1) {
                     Event.updateEventWithPlace(getContentResolver(), Long.toString(eventId), mPlace);
                 }

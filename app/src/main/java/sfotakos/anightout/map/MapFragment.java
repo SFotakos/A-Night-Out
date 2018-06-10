@@ -59,6 +59,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.DrawableUtils;
 import sfotakos.anightout.common.IconAndTextAdapter;
 import sfotakos.anightout.common.NetworkUtil;
@@ -77,9 +78,6 @@ import static android.app.Activity.RESULT_OK;
 // TODO finish filter layout
 // TODO persist state after rotation
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback, Callback<GooglePlacesPlaceResponse> {
-
-    public final static int LOCATION_PERMISSION_REQUEST_CODE = 12045;
-    public final static int REQUEST_GPS_SETTINGS_CODE = 45012;
 
     private static int ANIMATION_DURATION = 600;
     private static int DEFAULT_ZOOM_LEVEL = 15;
@@ -156,7 +154,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
             // After permission was granted
-            case LOCATION_PERMISSION_REQUEST_CODE: {
+            case Constants.LOCATION_PERMISSION_REQUEST_CODE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Check if GPS is turned on
@@ -169,7 +167,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Return when GPS was turned on after request
-        if (requestCode == REQUEST_GPS_SETTINGS_CODE) {
+        if (requestCode == Constants.REQUEST_GPS_SETTINGS_CODE) {
             if (resultCode == RESULT_OK) {
                 setRequestLocationUpdates();
             }
@@ -201,7 +199,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     place = searchedPlaces.get(marker.getId());
                     if (place != null) {
                         Intent placeDetailsIntent = new Intent(getActivity(), PlaceDetailsActivity.class);
-                        placeDetailsIntent.putExtra(PlaceDetailsActivity.PLACE_EXTRA, place);
+                        placeDetailsIntent.putExtra(Constants.PLACE_EXTRA, place);
                         startActivity(placeDetailsIntent);
                     }
                 }
@@ -375,7 +373,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_PERMISSION_REQUEST_CODE);
+                    Constants.LOCATION_PERMISSION_REQUEST_CODE);
             return false;
         }
         return true;
@@ -405,7 +403,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 ResolvableApiException resolvable = (ResolvableApiException) e;
                                 MapFragment.this.startIntentSenderForResult(
                                         resolvable.getResolution().getIntentSender(),
-                                        REQUEST_GPS_SETTINGS_CODE, null,
+                                        Constants.REQUEST_GPS_SETTINGS_CODE, null,
                                         0, 0, 0, null);
                             } catch (IntentSender.SendIntentException sendEx) {
                                 // Ignore this error
@@ -569,7 +567,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 getActivity(),
                 mBinding.getRoot().findViewById(R.id.map),
                 getString(R.string.mapFragment_marker_tutorial),
-                TutorialUtil.MAP_TUTORIAL_ID, false);
+                Constants.MAP_TUTORIAL, false);
     }
 
     private void showPriceFilterTutorial() {
@@ -577,6 +575,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 getActivity(),
                 mBinding.mapFilter.filterPriceRangeCheckBox,
                 getString(R.string.mapFilter_priceRange_tutorial),
-                TutorialUtil.MAP_FILTER_PRICE_TUTORIAL_ID, false);
+                Constants.MAP_FILTER_TUTORIAL_PRICE, false);
     }
 }
