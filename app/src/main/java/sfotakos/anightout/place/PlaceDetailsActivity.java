@@ -138,8 +138,9 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     }, Event.queryEvents(getContentResolver())));
             dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(this));
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            mEventsDialog = builder.setTitle("Add to event").setView(dialogBinding.getRoot()).show();
+            mEventsDialog = new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.placeDetails_eventsDialog_title))
+                    .setView(dialogBinding.getRoot()).show();
             return true;
         }
         return super.onOptionsItemSelected(item);

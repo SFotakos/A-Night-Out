@@ -565,20 +565,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private void showMapTutorial() {
-
         TutorialUtil.showDefaultTutorial(
                 getActivity(),
                 mBinding.getRoot().findViewById(R.id.map),
-                "You can search for places near the selected location by clicking and holding on the map.",
+                getString(R.string.mapFragment_marker_tutorial),
                 TutorialUtil.MAP_TUTORIAL_ID, false);
     }
 
-    private void showPriceFilterTutorial(){
+    private void showPriceFilterTutorial() {
         TutorialUtil.showDefaultTutorial(
                 getActivity(),
                 mBinding.mapFilter.filterPriceRangeCheckBox,
-                "Places that do not include price into their description will not show with this option on!",
+                getString(R.string.mapFilter_priceRange_tutorial),
                 TutorialUtil.MAP_FILTER_PRICE_TUTORIAL_ID, false);
     }
-
 }

@@ -1,21 +1,26 @@
 package sfotakos.anightout.home;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import sfotakos.anightout.R;
 import sfotakos.anightout.events.EventsFragment;
 import sfotakos.anightout.map.MapFragment;
 
 public class HomeNavigationFragmentPagerAdapter extends FragmentPagerAdapter {
-    private final int PAGE_COUNT = 2;
-    private String titles[] = new String[]{"Events", "Map"};
+    private static final int PAGE_COUNT = 2;
+    private List<String> titles = new ArrayList<>();
     private ArrayList<Fragment> fragments = new ArrayList<>();
 
-    public HomeNavigationFragmentPagerAdapter(FragmentManager fm) {
+    public HomeNavigationFragmentPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
+        titles.add(context.getString(R.string.home_eventsTab_title));
+        titles.add(context.getString(R.string.home_mapTab_title));
     }
 
     @Override
@@ -42,6 +47,6 @@ public class HomeNavigationFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return titles[position];
+        return titles.get(position);
     }
 }

@@ -11,6 +11,10 @@
 
     <string name="eventDetails_menuItem_share_title">Share</string>
     <string name="eventDetails_menuItem_delete_title">Delete event</string>
+    <string name="eventDetails_deleteDialog_confirmText">Confirm</string>
+    <string name="eventDetails_deleteDialog_cancelText">Cancel</string>
+    <string name="eventDetails_deleteDialog_title">Confirm event deletion?</string>
+    <string name="eventDetails_shareIntent_title">Share image with …</string>
 
     <string name="placeDetails_addToEvent">Add to event</string>
 
@@ -22,4 +26,13 @@
     <string name="addEvent_newEvent">New event</string>
 
     <string name="any_distanceWithMeters">%d m</string>
+
+    <string name="mapFragment_marker_tutorial">You can search for places near the selected location by clicking and holding on the map.</string>
+    <string name="mapFilter_priceRange_tutorial">Places that do not include price into their description will not show with this option on!</string>
+
+    <string name="placeDetails_eventsDialog_title">Add to event</string>
+
+    <string name="home_eventsTab_title">Events</string>
+    <string name="home_mapTab_title">Map</string>
+
 </resources>

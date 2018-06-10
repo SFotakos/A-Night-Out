@@ -20,7 +20,7 @@ public class HomeActivity extends AppCompatActivity {
         setSupportActionBar(mBinding.homeToolbar);
 
         mBinding.homeViewPager.setAdapter(
-                new HomeNavigationFragmentPagerAdapter(getSupportFragmentManager()));
+                new HomeNavigationFragmentPagerAdapter(this, getSupportFragmentManager()));
 
         mBinding.homeTabLayout.setupWithViewPager(mBinding.homeViewPager);
     }

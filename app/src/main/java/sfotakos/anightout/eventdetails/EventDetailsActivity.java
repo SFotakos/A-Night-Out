@@ -155,19 +155,21 @@ public class EventDetailsActivity extends AppCompatActivity {
             case R.id.detailsAction_delete:
                 if (deleteConfirmationDialog == null) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Event.deleteEvent(getContentResolver(),
-                                    Integer.toString(mEvent.getEventId()));
-                            onNavigateUp();
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.setTitle("Confirm event deletion?");
+                    builder.setPositiveButton(getString(R.string.eventDetails_deleteDialog_confirmText),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Event.deleteEvent(getContentResolver(),
+                                            Integer.toString(mEvent.getEventId()));
+                                    onNavigateUp();
+                                }
+                            });
+                    builder.setNegativeButton(getString(R.string.eventDetails_deleteDialog_cancelText),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    builder.setTitle(getString(R.string.eventDetails_deleteDialog_title));
                     deleteConfirmationDialog = builder.create();
                 }
 
@@ -251,7 +253,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Intent.EXTRA_STREAM, getImageUri(this, shareableBitmap));
         intent.setType("image/png");
-        startActivity(Intent.createChooser(intent, "Share image with ..."));
+        startActivity(Intent.createChooser(intent, getString(R.string.eventDetails_shareIntent_title)));
     }
 
     // As seen from https://www.logicchip.com/share-image-without-saving/

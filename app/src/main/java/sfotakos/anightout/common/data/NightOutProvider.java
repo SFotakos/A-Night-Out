@@ -88,7 +88,7 @@ public class NightOutProvider extends ContentProvider {
                     returnUri = ContentUris
                             .withAppendedId(EventEntry.CONTENT_URI, _id);
                 } else {
-                    throw new android.database.SQLException("Failed to insert favorite into " + uri);
+                    throw new android.database.SQLException("Failed to insert event into " + uri);
                 }
                 break;
 
