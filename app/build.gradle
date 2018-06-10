@@ -24,15 +24,13 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:exifinterface:27.1.1'
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
 
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.android.support:support-media-compat:27.1.1'
-
-    implementation 'com.github.takusemba:spotlight:1.5.0'
-    implementation 'com.android.support:exifinterface:27.1.1'
 
     implementation 'com.squareup.picasso:picasso:2.71828'
 
@@ -52,6 +50,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     implementation 'blue.aodev:material-values:1.1.1'
+
+    implementation 'com.github.iammert:MaterialIntroView:1.6.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

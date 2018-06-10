@@ -58,14 +58,15 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import sfotakos.anightout.R;
 import sfotakos.anightout.common.DrawableUtils;
-import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesPlaceResponse;
 import sfotakos.anightout.common.IconAndTextAdapter;
 import sfotakos.anightout.common.NetworkUtil;
-import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
-import sfotakos.anightout.R;
-import sfotakos.anightout.databinding.FragmentMapBinding;
+import sfotakos.anightout.common.TutorialUtil;
+import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesPlaceResponse;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
+import sfotakos.anightout.databinding.FragmentMapBinding;
 import sfotakos.anightout.place.PlaceDetailsActivity;
 
 import static android.app.Activity.RESULT_OK;
@@ -233,6 +234,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
         setSearchCircle(MIN_SEARCH_RADIUS + seekbarProgress);
         showFilter();
+        showPriceFilterTutorial();
     }
 
     @Override
@@ -357,6 +359,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     CameraUpdateFactory.newLatLngZoom(latLng, mZoomLevel),
                     ANIMATION_DURATION, callback);
         }
+        showMapTutorial();
     }
 
     private boolean hasLocationPermission() {
@@ -559,6 +562,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void canUseFilterActions(boolean enabled) {
         mBinding.mapFilter.filterSearchButton.setEnabled(enabled);
         mBinding.mapFilter.filterCancelButton.setEnabled(enabled);
+    }
+
+    private void showMapTutorial() {
+
+        TutorialUtil.showDefaultTutorial(
+                getActivity(),
+                mBinding.getRoot().findViewById(R.id.map),
+                "You can search for places near the selected location by clicking and holding on the map.",
+                TutorialUtil.MAP_TUTORIAL_ID, false);
+    }
+
+    private void showPriceFilterTutorial(){
+        TutorialUtil.showDefaultTutorial(
+                getActivity(),
+                mBinding.mapFilter.filterPriceRangeCheckBox,
+                "Places that do not include price into their description will not show with this option on!",
+                TutorialUtil.MAP_FILTER_PRICE_TUTORIAL_ID, false);
     }
 
 }
