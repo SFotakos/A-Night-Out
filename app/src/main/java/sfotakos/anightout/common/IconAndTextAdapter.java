@@ -26,9 +26,9 @@ public class IconAndTextAdapter extends ArrayAdapter<String> {
     private List<String> textList; //TODO turn description into resID
     private List<Integer> iconResIdList;
 
-    private boolean displayIcon = true;
+    private boolean displayIcon;
 
-    public IconAndTextAdapter(@NonNull Context context, @NonNull int layout, @NonNull List<String> textList, @NonNull List<Integer> iconResIdList) {
+    public IconAndTextAdapter(@NonNull Context context, int layout, @NonNull List<String> textList, @NonNull List<Integer> iconResIdList) {
         super(context, layout);
         this.mContext = context;
         this.textList = textList;
@@ -37,7 +37,7 @@ public class IconAndTextAdapter extends ArrayAdapter<String> {
         displayIcon = true;
     }
 
-    public IconAndTextAdapter(@NonNull Context context, @NonNull int layout, @NonNull List<String> textList) {
+    public IconAndTextAdapter(@NonNull Context context, int layout, @NonNull List<String> textList) {
         super(context, layout);
         this.mContext = context;
         this.textList = textList;

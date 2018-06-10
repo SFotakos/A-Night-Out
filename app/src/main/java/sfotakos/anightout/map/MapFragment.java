@@ -196,7 +196,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Place place = null;
+                Place place;
                 if (searchedPlaces != null) {
                     place = searchedPlaces.get(marker.getId());
                     if (place != null) {

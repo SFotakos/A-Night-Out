@@ -4,8 +4,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.google.android.gms.maps.SupportMapFragment;
-
 import java.util.ArrayList;
 
 import sfotakos.anightout.events.EventsFragment;
