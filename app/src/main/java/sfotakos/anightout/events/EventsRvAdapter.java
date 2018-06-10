@@ -35,18 +35,19 @@ public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventV
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-            Event event = eventList.get(position);
+        Event event = eventList.get(position);
 
-            holder.mEventDate.setText(event.getEventDate());
-            holder.mEventName.setText(event.getEventName());
+        holder.mEventName.setText(event.getEventName());
+        holder.mEventDate.setText(event.getEventDate());
+        holder.mEventTime.setText(event.getEventTime());
 
-            Place place = event.getPlace();
-            if (place != null && place.getName() != null && !place.getName().isEmpty()){
-                holder.mEstablishmentName.setText(place.getName());
-                holder.mEstablishmentName.setVisibility(View.VISIBLE);
-            } else {
-                holder.mEstablishmentName.setVisibility(View.GONE);
-            }
+        Place place = event.getPlace();
+        if (place != null && place.getName() != null && !place.getName().isEmpty()) {
+            holder.mPlaceName.setText(place.getName());
+            holder.mPlaceName.setVisibility(View.VISIBLE);
+        } else {
+            holder.mPlaceName.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -54,19 +55,21 @@ public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventV
         return eventList.size();
     }
 
-    class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        TextView mEventDate;
         TextView mEventName;
-        TextView mEstablishmentName;
+        TextView mEventDate;
+        TextView mEventTime;
+        TextView mPlaceName;
 
         EventViewHolder(View itemView) {
             super(itemView);
 
             itemView.setOnClickListener(this);
-            mEventDate = itemView.findViewById(R.id.eventItem_date_tv);
             mEventName = itemView.findViewById(R.id.eventItem_name_tv);
-            mEstablishmentName = itemView.findViewById(R.id.eventItem_establishment_tv);
+            mEventDate = itemView.findViewById(R.id.eventItem_date_tv);
+            mEventTime = itemView.findViewById(R.id.eventItem_time_tv);
+            mPlaceName = itemView.findViewById(R.id.eventItem_placeName_tv);
         }
 
         @Override
