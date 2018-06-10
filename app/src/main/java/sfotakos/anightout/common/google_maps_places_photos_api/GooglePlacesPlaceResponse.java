@@ -3,11 +3,12 @@ package sfotakos.anightout.common.google_maps_places_photos_api;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 
-public class GooglePlacesPlaceResponse {
+public class GooglePlacesPlaceResponse implements Serializable {
 
 
     @SerializedName("html_attributions")

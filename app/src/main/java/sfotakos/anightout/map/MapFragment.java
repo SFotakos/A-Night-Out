@@ -37,12 +37,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.IconAndTextAdapter;
+import sfotakos.anightout.common.MapState;
 import sfotakos.anightout.common.MapHelper;
 import sfotakos.anightout.common.TutorialUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
@@ -50,14 +52,9 @@ import sfotakos.anightout.databinding.FragmentMapBinding;
 
 import static android.app.Activity.RESULT_OK;
 
-/**
- * A simple {@link Fragment} subclass.
- */
-// TODO finish filter layout
-// TODO persist state after rotation
 public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelper.IMapHelper {
 
-    private static int MIN_SEARCH_RADIUS = 100; // This is a workaround so SeekBar has a min value
+     // This is a workaround so SeekBar has a min value
 
     private FragmentMapBinding mBinding;
     private Context mContext;
@@ -66,19 +63,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
     private MapHelper mMapHelper;
 
     private FusedLocationProviderClient mFusedLocationClient;
-    private GooglePlacesRequest mPlacesRequest = new GooglePlacesRequest();
 
-    private boolean isPriceFilteringEnabled = true;
-    private boolean hasZoomedIn = false;
-
-    public MapFragment() {
-        // Required empty public constructor
+    public MapFragment() { // Required empty public constructor
     }
 
     public static MapFragment newInstance() {
         return new MapFragment();
     }
 
+    //region Lifecycle management
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -87,12 +80,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onResume() {
+        super.onResume();
         SupportMapFragment supportMapFragment =
                 ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
         supportMapFragment.getMapAsync(this);
-
         setupFragment();
     }
 
@@ -100,42 +92,54 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        if (context instanceof Activity) {
-            mActivity = (Activity) context;
-        } else {
-            mActivity = getActivity();
-        }
         mContext = context;
+        mActivity = mContext instanceof Activity ? (Activity) context : getActivity();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-
-        if (getUserVisibleHint() && !hasZoomedIn) {
-            getUserLastKnownLocationWithChecks();
-        }
+        mMapHelper = new MapHelper(getContext(), this);
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser && !hasZoomedIn) {
+        if (isVisibleToUser && mMapHelper.isMapReady() && !mMapHelper.getMapState().hasZoomedIn()) {
             getUserLastKnownLocationWithChecks();
         }
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mMapHelper.getMapState().setCenterMarkerLatLng(mMapHelper.getMapState().getClickedLatLng());
+        outState.putSerializable(Constants.STATE_MAP, mMapHelper.getMapState());
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            Serializable serializable = savedInstanceState.getSerializable(Constants.STATE_MAP);
+            if (serializable != null && serializable instanceof MapState) {
+                mMapHelper.restoreMapState((MapState) serializable);
+                togglePriceFilteringViewState(mMapHelper.getMapState().isPriceSearchingEnabled());
+                if (mMapHelper.getMapState().isFilterEnabled()) {
+                    showFilter();
+                }
+            }
+        }
+    }
+    //endregion
+
     //region GPS and Permission callback
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
             // After permission was granted
-            case Constants.LOCATION_PERMISSION_REQUEST_CODE: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            case Constants.LOCATION_PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Check if GPS is turned on
                     requestGPS();
                 }
-            }
         }
     }
 
@@ -153,7 +157,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMapHelper = new MapHelper(mContext, googleMap, this);
+        mMapHelper.setGoogleMap(googleMap);
+        mBinding.mapCenterPositionImageButton.setVisibility(View.VISIBLE);
     }
 
     //region IMapHelper callbacks
@@ -166,80 +171,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
     public void onPlacesRequestFailure() {
         canUseFilterActions(true);
     }
-
-    @Override
-    public void onLocationResult() {
-        hasZoomedIn = true;
-        mBinding.mapCenterPositionImageButton.setVisibility(View.VISIBLE);
-    }
     //endregion
 
     //region Camera callback
     @Override
     public void onCameraAnimationFinished() {
-        int seekbarProgress = 0;
-        try {
-            seekbarProgress = mBinding.mapFilter.filterDistanceSeekBar.getProgress();
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
-        }
-
-        mMapHelper.setSearchCircle(MIN_SEARCH_RADIUS + seekbarProgress);
+        mMapHelper.setSearchCircle(Integer.valueOf(mMapHelper.getMapState().getSearchRadius()));
         showFilter();
         showPriceFilterTutorial();
     }
 
     @Override
-    public void onCameraAnimationCancelled() {
-        // Nothing to be done
+    public void onCameraAnimationCancelled() { // Nothing to be done
     }
     //endregion
 
     //region Filter and places request
     private void showFilter() {
+        mMapHelper.getMapState().setFilterEnabled(true);
         mBinding.mapFilter.getRoot().setVisibility(View.VISIBLE);
-
-        //TODO persist filterOptions and reapply them on marker change
-        mBinding.mapFilter.filterSearchButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        requestPlaces();
-                    }
-                });
-
-        mBinding.mapFilter.filterCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetFilterOptions();
-                mMapHelper.cleanMap();
-                mBinding.mapFilter.getRoot().setVisibility(View.GONE);
-            }
-        });
-
-        mBinding.mapFilter.filterDistanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                int progressWithOffset = progress + MIN_SEARCH_RADIUS;
-                mBinding.mapFilter.filterDistanceTextView.setText(
-                        getResources().getString(R.string.any_distanceWithMeters, progressWithOffset));
-                mMapHelper.setSearchCircle(progressWithOffset);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
     }
 
     private void resetFilterOptions() {
         mBinding.mapFilter.filterDistanceSeekBar.setProgress(0);
+        mMapHelper.getMapState().setSearchRadius(Integer.toString(MapState.MIN_SEARCH_RADIUS));
+        mMapHelper.getMapState().setCenterMarkerLatLng(null);
     }
 
     private void canUseFilterActions(boolean enabled) {
@@ -249,11 +205,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
 
     private void requestPlaces() {
         canUseFilterActions(false);
-        mMapHelper.clearSearchedPlaces();
-        GooglePlacesRequest.requestPlacesFromAPI(getResources(), mMapHelper.getClickedLatLng(),
-                Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress() + MIN_SEARCH_RADIUS),
-                mPlacesRequest.getType(),
-                isPriceFilteringEnabled ? mPlacesRequest.getPrice() : null, mMapHelper);
+        mMapHelper.requestPlaces(getResources(), mMapHelper.getMapState());
     }
     //endregion
 
@@ -269,80 +221,133 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
 
     //region Fragment interaction setup
     private void setupFragment() {
-        mBinding.mapFilter.filterDistanceTextView.setText(
-                getResources().getString(R.string.any_distanceWithMeters, MIN_SEARCH_RADIUS));
-
-        List<Integer> iconResList = new ArrayList<>();
-        final List<String> placeDescriptionList = new ArrayList<>();
-
-        for (GooglePlacesRequest.PlaceType placeType : GooglePlacesRequest.PlaceType.values()) {
-            iconResList.add(placeType.getIconResId());
-            placeDescriptionList.add(placeType.getDescription());
-        }
-
-        IconAndTextAdapter placeIconAndTextAdapter =
-                new IconAndTextAdapter(
-                        mContext,
-                        R.layout.spinner_icon_and_text,
-                        placeDescriptionList,
-                        iconResList);
-
-        mBinding.mapFilter.filterPlaceSpinner.setAdapter(placeIconAndTextAdapter);
-        mBinding.mapFilter.filterPlaceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
-                mPlacesRequest.setType(GooglePlacesRequest.PlaceType.values()[position].getTag());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView adapterView) {
-
-            }
-        });
-
-        final List<String> priceDescriptionList = new ArrayList<>();
-
-        for (GooglePlacesRequest.PlacePrice placePrice : GooglePlacesRequest.PlacePrice.values()) {
-            priceDescriptionList.add(placePrice.getDescription());
-        }
-
-        IconAndTextAdapter priceIconAndTextAdapter =
-                new IconAndTextAdapter(
-                        mContext,
-                        R.layout.spinner_icon_and_text,
-                        priceDescriptionList);
-
-        mBinding.mapFilter.filterPriceRangeSpinner.setAdapter(priceIconAndTextAdapter);
-        mBinding.mapFilter.filterPriceRangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
-                mPlacesRequest.setPrice(GooglePlacesRequest.PlacePrice.values()[position].getTag());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView adapterView) {
-
-            }
-        });
-
-        mBinding.mapFilter.filterPriceRangeCheckBox.setChecked(isPriceFilteringEnabled);
-        mBinding.mapFilter.filterPriceRangeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isPriceFilteringEnabled = isChecked;
-                mBinding.mapFilter.filterPriceRangeSpinner.setEnabled(isChecked);
-                mBinding.mapFilter.filterPriceRangeSpinner.getSelectedView().setEnabled(isChecked);
-                mBinding.mapFilter.filterPriceRangeImageView.setColorFilter(isChecked ?
-                                getResources().getColor(android.R.color.white) :
-                                getResources().getColor(android.R.color.darker_gray),
-                        PorterDuff.Mode.SRC_ATOP);
-            }
-        });
+        setupPlaceFilter();
+        setupPriceFilter();
+        setupRangeFilter();
+        setupFilterActions();
 
         mBinding.mapCenterPositionImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getUserLastKnownLocationWithChecks();
+            }
+        });
+    }
+
+    private void togglePriceFilteringViewState(final boolean enabled) {
+        mBinding.mapFilter.filterPriceRangeSpinner.post(new Runnable() {
+            @Override
+            public void run() {
+                View selectedView = mBinding.mapFilter.filterPriceRangeSpinner.getSelectedView();
+                if (selectedView != null) {
+                    selectedView.setEnabled(enabled);
+                }
+            }
+        });
+        mBinding.mapFilter.filterPriceRangeSpinner.setEnabled(enabled);
+
+        mBinding.mapFilter.filterPriceRangeImageView.setColorFilter(enabled ?
+                        getResources().getColor(android.R.color.white) :
+                        getResources().getColor(android.R.color.darker_gray),
+                PorterDuff.Mode.SRC_ATOP);
+    }
+
+    private void setupPriceFilter() {
+        togglePriceFilteringViewState(mMapHelper.getMapState().isPriceSearchingEnabled());
+        final List<String> priceDescriptionList = new ArrayList<>();
+        for (GooglePlacesRequest.PlacePrice placePrice : GooglePlacesRequest.PlacePrice.values()) {
+            priceDescriptionList.add(placePrice.getDescription());
+        }
+        IconAndTextAdapter priceIconAndTextAdapter = new IconAndTextAdapter(mContext,
+                R.layout.spinner_icon_and_text, priceDescriptionList);
+        mBinding.mapFilter.filterPriceRangeSpinner.setAdapter(priceIconAndTextAdapter);
+        mBinding.mapFilter.filterPriceRangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
+                mMapHelper.getMapState().setPrice(GooglePlacesRequest.PlacePrice.values()[position].getTag());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView adapterView) {
+
+            }
+        });
+
+        mBinding.mapFilter.filterPriceRangeCheckBox.setChecked(mMapHelper.getMapState().isPriceSearchingEnabled());
+        mBinding.mapFilter.filterPriceRangeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mMapHelper.getMapState().setPriceSearchingEnabled(isChecked);
+                togglePriceFilteringViewState(isChecked);
+            }
+        });
+    }
+
+    private void setupRangeFilter() {
+        mBinding.mapFilter.filterDistanceSeekBar.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        int progressWithOffset = progress + MapState.MIN_SEARCH_RADIUS;
+                        mBinding.mapFilter.filterDistanceTextView.setText(
+                                getResources().getString(R.string.any_distanceWithMeters, progressWithOffset));
+                        mMapHelper.setSearchCircle(progressWithOffset);
+                        mMapHelper.getMapState().setSearchRadius(Integer.toString(progressWithOffset));
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
+        mBinding.mapFilter.filterDistanceTextView.setText(
+                getResources().getString(R.string.any_distanceWithMeters,
+                        Integer.valueOf(mMapHelper.getMapState().getSearchRadius())));
+    }
+
+    private void setupPlaceFilter() {
+        List<Integer> iconResList = new ArrayList<>();
+        final List<String> placeDescriptionList = new ArrayList<>();
+        for (GooglePlacesRequest.PlaceType placeType : GooglePlacesRequest.PlaceType.values()) {
+            iconResList.add(placeType.getIconResId());
+            placeDescriptionList.add(placeType.getDescription());
+        }
+        IconAndTextAdapter placeIconAndTextAdapter = new IconAndTextAdapter(mContext,
+                R.layout.spinner_icon_and_text, placeDescriptionList, iconResList);
+        mBinding.mapFilter.filterPlaceSpinner.setAdapter(placeIconAndTextAdapter);
+        mBinding.mapFilter.filterPlaceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
+                mMapHelper.getMapState().setType(GooglePlacesRequest.PlaceType.values()[position].getTag());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView adapterView) {
+
+            }
+        });
+    }
+
+    private void setupFilterActions() {
+        mBinding.mapFilter.filterSearchButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        requestPlaces();
+                    }
+                });
+
+        mBinding.mapFilter.filterCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetFilterOptions();
+                if (mMapHelper.isMapReady())
+                    mMapHelper.cleanMap();
+                mBinding.mapFilter.getRoot().setVisibility(View.GONE);
+                mMapHelper.getMapState().setFilterEnabled(false);
             }
         });
     }

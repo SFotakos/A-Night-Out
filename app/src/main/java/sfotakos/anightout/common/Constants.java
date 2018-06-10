@@ -4,6 +4,8 @@ public class Constants {
     public final static String PLACE_EXTRA = "placeDetails_placeExtra";
     public final static String EVENT_EXTRA = "eventDetails_eventExtra";
 
+    public final static String STATE_MAP = "state_map";
+
     public final static int WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 28145;
     public final static int LOCATION_PERMISSION_REQUEST_CODE = 12045;
     public final static int REQUEST_GPS_SETTINGS_CODE = 45012;

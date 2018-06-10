@@ -2,6 +2,7 @@ package sfotakos.anightout.common;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
@@ -31,73 +32,34 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesPlaceResponse;
+import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 
 public class MapHelper implements GoogleMap.CancelableCallback, Callback<GooglePlacesPlaceResponse> {
 
     private static int ANIMATION_DURATION = 600;
-    private static int DEFAULT_ZOOM_LEVEL = 15;
 
     private Context mContext;
     private IMapHelper mMapHelperListener;
+    private MapState mapState = new MapState();
 
-    private GoogleMap mGoogleMap;
     private PlaceClusterManager<PlaceClusterItem> mClusterManager;
+    private LocationCallback mLocationCallback;
+    private GoogleMap mGoogleMap;
     private Marker mCenterMarker;
     private Circle mSearchCircle;
-    private LatLng mClickedLatLng;
-
-    private LocationCallback mLocationCallback;
-
-    private int mZoomLevel = DEFAULT_ZOOM_LEVEL;
 
     //This ensures only one listener is set to receive location update at a time
     private boolean isRequestLocationUpdatesActive = false;
 
-    public MapHelper(@NonNull Context context,
-                     @NonNull GoogleMap googleMap,
-                     @NonNull IMapHelper mapHelperListener) {
-        this.mContext = context;
-        this.mGoogleMap = googleMap;
-        this.mMapHelperListener = mapHelperListener;
-
-        mGoogleMap = googleMap;
-        mGoogleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(
-                context, R.raw.maps_style_json));
-
-        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(final LatLng latLng) {
-                cleanMap();
-
-                mClickedLatLng = latLng;
-                moveMapToUserLocation(latLng, true);
-            }
-        });
-
-        mClusterManager = new PlaceClusterManager<>(mContext, mGoogleMap);
-        mClusterManager.setRenderer(new PlaceClusterRenderer(mContext, mGoogleMap, mClusterManager));
-        mGoogleMap.setOnCameraIdleListener(mClusterManager);
-        mGoogleMap.setOnMarkerClickListener(mClusterManager);
-    }
-
-    public LatLng getClickedLatLng() {
-        return this.mClickedLatLng;
+    public MapHelper(Context mContext, IMapHelper mMapHelperListener) {
+        this.mContext = mContext;
+        this.mMapHelperListener = mMapHelperListener;
     }
 
     @Override
     public void onFinish() {
-        Bitmap markerBitmap = DrawableUtils.getBitmapFromVectorDrawable(
-                mContext, R.drawable.ic_pin);
-        Bitmap tintedMarkerBitmap = DrawableUtils.tintImage(markerBitmap,
-                ContextCompat.getColor(mContext, R.color.colorPrimary));
-
-        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(tintedMarkerBitmap);
-
-        mCenterMarker = mGoogleMap.addMarker(new MarkerOptions()
-                .position(mClickedLatLng)
-                .icon(bitmapDescriptor)
-                .draggable(false));
+        setCenterMaker();
         mMapHelperListener.onCameraAnimationFinished();
     }
 
@@ -107,11 +69,16 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
     }
 
     @Override
-    public void onResponse(@NonNull Call<GooglePlacesPlaceResponse> call, @NonNull Response<GooglePlacesPlaceResponse> response) {
+    public void onResponse(@NonNull Call<GooglePlacesPlaceResponse> call,
+                           @NonNull Response<GooglePlacesPlaceResponse> response) {
         mMapHelperListener.onPlacesRequestSuccessful();
-        GooglePlacesPlaceResponse placesResponse = response.body();
-        if (placesResponse != null) {
-            List<Place> places = placesResponse.getResults();
+        mapState.setCurrentPlacesResponse(response.body());
+        addPlacesToMap();
+    }
+
+    private void addPlacesToMap() {
+        if (mapState.getCurrentPlacesResponse() != null) {
+            List<Place> places = mapState.getCurrentPlacesResponse().getResults();
             for (final Place place : places) {
                 LatLng placeLatLng = new LatLng(place.getGeometry().getLocation().getLat(),
                         place.getGeometry().getLocation().getLng());
@@ -133,13 +100,29 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
         t.printStackTrace();
     }
 
+    private void setCenterMaker() {
+        Bitmap markerBmp = DrawableUtils.getBitmapFromVectorDrawable(mContext, R.drawable.ic_pin);
+        Bitmap tintedMarkerBitmap = DrawableUtils.tintImage(markerBmp,
+                ContextCompat.getColor(mContext, R.color.colorPrimary));
+        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(tintedMarkerBitmap);
+
+        if (mapState.getClickedLatLng() != null) {
+            mCenterMarker = mGoogleMap.addMarker(new MarkerOptions()
+                    .position(mapState.getClickedLatLng())
+                    .icon(bitmapDescriptor)
+                    .draggable(false));
+        }
+    }
+
     public void setSearchCircle(int progress) {
         safeRemoveCircle();
-        mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
-                .center(mCenterMarker.getPosition())
-                .radius(progress)
-                .strokeColor(ContextCompat.getColor(mContext, R.color.colorAccent))
-                .fillColor(Color.TRANSPARENT));
+        if (mCenterMarker != null) {
+            mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
+                    .center(mCenterMarker.getPosition())
+                    .radius(progress)
+                    .strokeColor(ContextCompat.getColor(mContext, R.color.colorAccent))
+                    .fillColor(Color.TRANSPARENT));
+        }
     }
 
     public void cleanMap() {
@@ -160,8 +143,9 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
         }
     }
 
-    public void clearSearchedPlaces() {
+    private void clearSearchedPlaces() {
         mClusterManager.clearItems();
+        mapState.setCurrentPlacesResponse(null);
     }
 
     @SuppressLint("MissingPermission")
@@ -175,9 +159,9 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
                         moveMapToUserLocation(
                                 new LatLng(location.getLatitude(), location.getLongitude()),
                                 false);
-                        mMapHelperListener.onLocationResult();
-                        fusedLocationClient.removeLocationUpdates(mLocationCallback);
+                        mapState.setHasZoomedIn(true);
                         isRequestLocationUpdatesActive = false;
+                        fusedLocationClient.removeLocationUpdates(mLocationCallback);
                     }
                 }
             };
@@ -193,10 +177,56 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
         GoogleMap.CancelableCallback callback = shouldUseCallback ? this : null;
         if (latLng != null && mGoogleMap != null) {
             mGoogleMap.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(latLng, mZoomLevel),
+                    CameraUpdateFactory.newLatLngZoom(latLng, mapState.getZoomLevel()),
                     ANIMATION_DURATION, callback);
         }
         mMapHelperListener.showMapTutorial();
+    }
+
+    public void requestPlaces(Resources resources, MapState mapState) {
+        clearSearchedPlaces();
+        GooglePlacesRequest.requestPlacesFromAPI(resources, mapState.getClickedLatLng(),
+                mapState.getSearchRadius(),
+                mapState.getType(),
+                mapState.isPriceSearchingEnabled() ? mapState.getPrice() : null,
+                this);
+    }
+
+    public void restoreMapState(MapState mapState) {
+        this.mapState = mapState;
+    }
+
+    public MapState getMapState() {
+        return mapState;
+    }
+
+    public void setGoogleMap(GoogleMap googleMap) {
+        this.mGoogleMap = googleMap;
+        mGoogleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(mContext, R.raw.maps_style_json));
+
+        mGoogleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(final LatLng latLng) {
+                cleanMap();
+
+                mapState.setCenterMarkerLatLng(latLng);
+                moveMapToUserLocation(latLng, true);
+            }
+        });
+
+        mClusterManager = new PlaceClusterManager<>(mContext, mGoogleMap);
+        mClusterManager.setRenderer(new PlaceClusterRenderer(mContext, mGoogleMap, mClusterManager));
+        mGoogleMap.setOnCameraIdleListener(mClusterManager);
+        mGoogleMap.setOnMarkerClickListener(mClusterManager);
+
+        setCenterMaker();
+        setSearchCircle(Integer.valueOf(mapState.getSearchRadius()));
+        addPlacesToMap();
+    }
+
+    public boolean isMapReady() {
+        return mGoogleMap != null;
     }
 
     public interface IMapHelper {
@@ -209,7 +239,5 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
         void onCameraAnimationCancelled();
 
         void showMapTutorial();
-
-        void onLocationResult();
     }
 }
