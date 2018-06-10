@@ -201,6 +201,9 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
     }
 
     public void setGoogleMap(GoogleMap googleMap) {
+        if (mGoogleMap != null){
+            mGoogleMap.clear();
+        }
         this.mGoogleMap = googleMap;
         mGoogleMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(mContext, R.raw.maps_style_json));
