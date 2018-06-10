@@ -1,15 +1,24 @@
-package sfotakos.anightout.common.google_maps_places_photos_api.model;
+package sfotakos.anightout.common.google_maps_places_photos_api;
+
+import android.content.res.Resources;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.security.InvalidParameterException;
 
+import retrofit2.Call;
+import retrofit2.Callback;
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.NetworkUtil;
 
-public class GooglePlacesRequestParams {
+public class GooglePlacesRequest {
 
     private String mType = PlaceType.RESTAURANT.getTag();
     private String mPrice = PlacePrice.VERYEXPENSIVE.getTag();
 
-   // TODO make description strings.xml resources
+    // TODO make description strings.xml resources
 
     public enum PlaceType {
 
@@ -21,7 +30,7 @@ public class GooglePlacesRequestParams {
         private String tag;
         private int iconResId;
 
-        PlaceType(int iconResId, String description, String tag){
+        PlaceType(int iconResId, String description, String tag) {
             this.iconResId = iconResId;
             this.description = description;
             this.tag = tag;
@@ -63,13 +72,13 @@ public class GooglePlacesRequestParams {
         private String description;
         private String tag;
 
-        PlacePrice(String description, String tag){
-          this.description = description;
-          this.tag = tag;
+        PlacePrice(String description, String tag) {
+            this.description = description;
+            this.tag = tag;
         }
 
-        public static String getDescriptionByTag(String tag){
-            for (PlacePrice placePrice : PlacePrice.values()){
+        public static String getDescriptionByTag(String tag) {
+            for (PlacePrice placePrice : PlacePrice.values()) {
                 if (placePrice.tag.equals(tag))
                     return placePrice.description;
             }
@@ -108,4 +117,18 @@ public class GooglePlacesRequestParams {
     public void setPrice(String mPrice) {
         this.mPrice = mPrice;
     }
+
+    public static void requestPlacesFromAPI(@NonNull Resources resources, @NonNull LatLng latLng,
+                                            @NonNull String searchRadius, @NonNull String placeType,
+                                            @Nullable String priceRange,
+                                            @NonNull Callback<GooglePlacesPlaceResponse> callback) {
+        Call<GooglePlacesPlaceResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
+                resources.getString(R.string.google_places_key),
+                latLng.latitude + "," + latLng.longitude,
+                searchRadius,
+                placeType,
+                priceRange);
+        placesCall.enqueue(callback);
+    }
+
 }

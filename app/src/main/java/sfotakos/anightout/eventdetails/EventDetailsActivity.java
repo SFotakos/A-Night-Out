@@ -35,7 +35,7 @@ import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.NetworkUtil;
-import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
+import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityEventDetailsBinding;
 import sfotakos.anightout.home.HomeActivity;
@@ -115,7 +115,7 @@ public class EventDetailsActivity extends AppCompatActivity {
                     if (place.getPriceLevel() >= 0) {
                         mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
                         mBinding.placeDetails.placePriceTextView.setText(
-                                GooglePlacesRequestParams.PlacePrice.getDescriptionByTag(
+                                GooglePlacesRequest.PlacePrice.getDescriptionByTag(
                                         Integer.toString(place.getPriceLevel())));
                     } else {
                         mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);

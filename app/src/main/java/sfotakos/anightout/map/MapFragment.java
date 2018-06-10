@@ -8,10 +8,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,47 +25,28 @@ import android.widget.SeekBar;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
-import sfotakos.anightout.common.DrawableUtils;
 import sfotakos.anightout.common.IconAndTextAdapter;
-import sfotakos.anightout.common.NetworkUtil;
+import sfotakos.anightout.common.MapHelper;
 import sfotakos.anightout.common.TutorialUtil;
-import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesPlaceResponse;
-import sfotakos.anightout.common.google_maps_places_photos_api.model.GooglePlacesRequestParams;
-import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
+import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.databinding.FragmentMapBinding;
-import sfotakos.anightout.place.PlaceDetailsActivity;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -77,32 +55,21 @@ import static android.app.Activity.RESULT_OK;
  */
 // TODO finish filter layout
 // TODO persist state after rotation
-public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.CancelableCallback, Callback<GooglePlacesPlaceResponse> {
+public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelper.IMapHelper {
 
-    private static int ANIMATION_DURATION = 600;
-    private static int DEFAULT_ZOOM_LEVEL = 15;
     private static int MIN_SEARCH_RADIUS = 100; // This is a workaround so SeekBar has a min value
 
     private FragmentMapBinding mBinding;
+    private Context mContext;
+    private Activity mActivity;
+
+    private MapHelper mMapHelper;
 
     private FusedLocationProviderClient mFusedLocationClient;
-    private LocationCallback mLocationCallback;
-
-    private GoogleMap mGoogleMap;
-    private Marker mCenterMarker;
-    private Circle mSearchCircle;
-    private LatLng mClickedLatLng;
-
-    private int mZoomLevel = DEFAULT_ZOOM_LEVEL;
-
-    private boolean hasZoomedIn = false;
-    private boolean isRequestLocationUpdatesActive = false; //This ensures only one listener is set to receive location update at a time
-
-    private List<Marker> searchedPlacesMarker = new ArrayList<>();
-    private HashMap<String, Place> searchedPlaces = new HashMap<>();
-    private GooglePlacesRequestParams mPlacesRequest = new GooglePlacesRequestParams();
+    private GooglePlacesRequest mPlacesRequest = new GooglePlacesRequest();
 
     private boolean isPriceFilteringEnabled = true;
+    private boolean hasZoomedIn = false;
 
     public MapFragment() {
         // Required empty public constructor
@@ -133,6 +100,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        if (context instanceof Activity) {
+            mActivity = (Activity) context;
+        } else {
+            mActivity = getActivity();
+        }
+        mContext = context;
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
         if (getUserVisibleHint() && !hasZoomedIn) {
@@ -148,6 +122,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
+    //region GPS and Permission callback
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
@@ -166,63 +141,42 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Return when GPS was turned on after request
+        // Returns when GPS was turned on after our request
         if (requestCode == Constants.REQUEST_GPS_SETTINGS_CODE) {
             if (resultCode == RESULT_OK) {
-                setRequestLocationUpdates();
+                mMapHelper.requestLocationUpdates(mFusedLocationClient);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+    //endregion
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mGoogleMap = googleMap;
-        mGoogleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(
-                getContext(), R.raw.maps_style_json));
-
-        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(final LatLng latLng) {
-                cleanMap();
-
-                mClickedLatLng = latLng;
-                moveMapToUserLocation(latLng, true);
-            }
-        });
-
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                Place place;
-                if (searchedPlaces != null) {
-                    place = searchedPlaces.get(marker.getId());
-                    if (place != null) {
-                        Intent placeDetailsIntent = new Intent(getActivity(), PlaceDetailsActivity.class);
-                        placeDetailsIntent.putExtra(Constants.PLACE_EXTRA, place);
-                        startActivity(placeDetailsIntent);
-                    }
-                }
-                return true;
-            }
-        });
+        mMapHelper = new MapHelper(mContext, googleMap, this);
     }
 
-    //region cameraAnimationCallback
+    //region IMapHelper callbacks
     @Override
-    public void onFinish() {
-        Bitmap markerBitmap = DrawableUtils.getBitmapFromVectorDrawable(
-                getContext(), R.drawable.ic_pin);
-        Bitmap tintedMarkerBitmap = DrawableUtils.tintImage(markerBitmap,
-                ContextCompat.getColor(getContext(), R.color.colorPrimary));
+    public void onPlacesRequestSuccessful() {
+        canUseFilterActions(true);
+    }
 
-        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(tintedMarkerBitmap);
+    @Override
+    public void onPlacesRequestFailure() {
+        canUseFilterActions(true);
+    }
 
-        mCenterMarker = mGoogleMap.addMarker(new MarkerOptions()
-                .position(mClickedLatLng)
-                .icon(bitmapDescriptor)
-                .draggable(false));
+    @Override
+    public void onLocationResult() {
+        hasZoomedIn = true;
+        mBinding.mapCenterPositionImageButton.setVisibility(View.VISIBLE);
+    }
+    //endregion
 
+    //region Camera callback
+    @Override
+    public void onCameraAnimationFinished() {
         int seekbarProgress = 0;
         try {
             seekbarProgress = mBinding.mapFilter.filterDistanceSeekBar.getProgress();
@@ -230,48 +184,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             npe.printStackTrace();
         }
 
-        setSearchCircle(MIN_SEARCH_RADIUS + seekbarProgress);
+        mMapHelper.setSearchCircle(MIN_SEARCH_RADIUS + seekbarProgress);
         showFilter();
         showPriceFilterTutorial();
     }
 
     @Override
-    public void onCancel() {
+    public void onCameraAnimationCancelled() {
+        // Nothing to be done
     }
     //endregion
 
-    //region retrofitCallResponse
-    @Override
-    public void onResponse(@NonNull Call<GooglePlacesPlaceResponse> call, @NonNull Response<GooglePlacesPlaceResponse> response) {
-        canUseFilterActions(true);
-        GooglePlacesPlaceResponse placesResponse = response.body();
-        if (placesResponse != null) {
-            List<Place> places = placesResponse.getResults();
-            for (final Place place : places) {
-                LatLng placeLatLng = new LatLng(place.getGeometry().getLocation().getLat(),
-                        place.getGeometry().getLocation().getLng());
-
-                MarkerOptions placeMarketOptions = new MarkerOptions()
-                        .position(placeLatLng)
-                        .icon(BitmapDescriptorFactory.fromBitmap(
-                                DrawableUtils.getBitmapFromVectorDrawable(
-                                        getContext(), R.drawable.ic_store)))
-                        .draggable(false);
-
-                Marker placeMarker = mGoogleMap.addMarker(placeMarketOptions);
-                searchedPlacesMarker.add(placeMarker);
-                searchedPlaces.put(placeMarker.getId(), place);
-            }
-        }
-    }
-
-    @Override
-    public void onFailure(@NonNull Call<GooglePlacesPlaceResponse> call, @NonNull Throwable t) {
-        canUseFilterActions(true);
-        t.printStackTrace();
-    }
-    //endregion
-
+    //region Filter and places request
     private void showFilter() {
         mBinding.mapFilter.getRoot().setVisibility(View.VISIBLE);
 
@@ -280,7 +204,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        requestPlacesFromAPI();
+                        requestPlaces();
                     }
                 });
 
@@ -288,7 +212,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             @Override
             public void onClick(View v) {
                 resetFilterOptions();
-                cleanMap();
+                mMapHelper.cleanMap();
                 mBinding.mapFilter.getRoot().setVisibility(View.GONE);
             }
         });
@@ -299,8 +223,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 int progressWithOffset = progress + MIN_SEARCH_RADIUS;
                 mBinding.mapFilter.filterDistanceTextView.setText(
                         getResources().getString(R.string.any_distanceWithMeters, progressWithOffset));
-                safeRemoveCircle();
-                setSearchCircle(progressWithOffset);
+                mMapHelper.setSearchCircle(progressWithOffset);
             }
 
             @Override
@@ -319,135 +242,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mBinding.mapFilter.filterDistanceSeekBar.setProgress(0);
     }
 
-    private void safeRemoveMarker() {
-        if (mCenterMarker != null) {
-            mCenterMarker.remove();
-        }
+    private void canUseFilterActions(boolean enabled) {
+        mBinding.mapFilter.filterSearchButton.setEnabled(enabled);
+        mBinding.mapFilter.filterCancelButton.setEnabled(enabled);
     }
 
-    private void safeRemoveCircle() {
-        if (mSearchCircle != null) {
-            mSearchCircle.remove();
-        }
+    private void requestPlaces() {
+        canUseFilterActions(false);
+        mMapHelper.clearSearchedPlaces();
+        GooglePlacesRequest.requestPlacesFromAPI(getResources(), mMapHelper.getClickedLatLng(),
+                Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress() + MIN_SEARCH_RADIUS),
+                mPlacesRequest.getType(),
+                isPriceFilteringEnabled ? mPlacesRequest.getPrice() : null, mMapHelper);
     }
-
-    private void clearSearchedPlaces() {
-        if (searchedPlacesMarker != null) {
-            for (Marker placeMarker : searchedPlacesMarker) {
-                placeMarker.remove();
-            }
-            searchedPlacesMarker.clear();
-        }
-
-        if (searchedPlaces != null) {
-            searchedPlaces.clear();
-        }
-    }
-
-    private void cleanMap() {
-        safeRemoveMarker();
-        safeRemoveCircle();
-        clearSearchedPlaces();
-    }
-
-    private void moveMapToUserLocation(LatLng latLng, boolean shouldUseCallback) {
-        GoogleMap.CancelableCallback callback = shouldUseCallback ? MapFragment.this : null;
-        if (latLng != null && mGoogleMap != null) {
-            mGoogleMap.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(latLng, mZoomLevel),
-                    ANIMATION_DURATION, callback);
-        }
-        showMapTutorial();
-    }
-
-    private boolean hasLocationPermission() {
-        Activity activity = getActivity();
-        Context context = getContext();
-
-        if (activity == null || context == null)
-            return false;
-
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    Constants.LOCATION_PERMISSION_REQUEST_CODE);
-            return false;
-        }
-        return true;
-    }
-
-    private void requestGPS() {
-        final Activity activity = getActivity();
-        Context context = getContext();
-
-        if (activity == null || context == null)
-            return;
-
-        final LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
-        LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest).build();
-        SettingsClient client = LocationServices.getSettingsClient(context);
-
-        client.checkLocationSettings(settingsRequest)
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        ApiException apiException = ((ApiException) e);
-                        if (apiException.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
-                            try {
-                                ResolvableApiException resolvable = (ResolvableApiException) e;
-                                MapFragment.this.startIntentSenderForResult(
-                                        resolvable.getResolution().getIntentSender(),
-                                        Constants.REQUEST_GPS_SETTINGS_CODE, null,
-                                        0, 0, 0, null);
-                            } catch (IntentSender.SendIntentException sendEx) {
-                                // Ignore this error
-                            }
-                        }
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
-                    @Override
-                    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                        if (locationSettingsResponse.getLocationSettingsStates().isLocationPresent() &&
-                                locationSettingsResponse.getLocationSettingsStates().isLocationUsable()) {
-                            setRequestLocationUpdates();
-                        }
-                    }
-                });
-    }
-
-    @SuppressLint("MissingPermission")
-    private void setRequestLocationUpdates() {
-        if (mFusedLocationClient != null && !isRequestLocationUpdatesActive) {
-            mLocationCallback = new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult result) {
-                    Location location = result.getLastLocation();
-                    if (location != null) {
-                        hasZoomedIn = true;
-                        moveMapToUserLocation(
-                                new LatLng(location.getLatitude(), location.getLongitude()),
-                                false);
-                        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-                        isRequestLocationUpdatesActive = false;
-
-                        mBinding.mapCenterPositionImageButton.setVisibility(View.VISIBLE);
-                    }
-                }
-            };
-            LocationRequest locationRequest = LocationRequest.create()
-                    .setInterval(1000).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-            isRequestLocationUpdatesActive = true;
-            mFusedLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, null);
-        }
-    }
+    //endregion
 
     private void getUserLastKnownLocationWithChecks() {
         if (hasLocationPermission()) {
@@ -455,20 +263,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    //TODO improve how this call is made
-    //TODO create a class to handle these requests
-    private void requestPlacesFromAPI() {
-        clearSearchedPlaces();
-        canUseFilterActions(false);
-        Call<GooglePlacesPlaceResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
-                getResources().getString(R.string.google_places_key),
-                mClickedLatLng.latitude + "," + mClickedLatLng.longitude,
-                Integer.toString(mBinding.mapFilter.filterDistanceSeekBar.getProgress() + MIN_SEARCH_RADIUS),
-                mPlacesRequest.getType(),
-                isPriceFilteringEnabled ? mPlacesRequest.getPrice() : null);
-        placesCall.enqueue(this);
+    public void onLocationAndGpsSuccess() {
+        mMapHelper.requestLocationUpdates(mFusedLocationClient);
     }
 
+    //region Fragment interaction setup
     private void setupFragment() {
         mBinding.mapFilter.filterDistanceTextView.setText(
                 getResources().getString(R.string.any_distanceWithMeters, MIN_SEARCH_RADIUS));
@@ -476,14 +275,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         List<Integer> iconResList = new ArrayList<>();
         final List<String> placeDescriptionList = new ArrayList<>();
 
-        for (GooglePlacesRequestParams.PlaceType placeType : GooglePlacesRequestParams.PlaceType.values()) {
+        for (GooglePlacesRequest.PlaceType placeType : GooglePlacesRequest.PlaceType.values()) {
             iconResList.add(placeType.getIconResId());
             placeDescriptionList.add(placeType.getDescription());
         }
 
         IconAndTextAdapter placeIconAndTextAdapter =
                 new IconAndTextAdapter(
-                        getContext(),
+                        mContext,
                         R.layout.spinner_icon_and_text,
                         placeDescriptionList,
                         iconResList);
@@ -492,7 +291,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mBinding.mapFilter.filterPlaceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
-                mPlacesRequest.setType(GooglePlacesRequestParams.PlaceType.values()[position].getTag());
+                mPlacesRequest.setType(GooglePlacesRequest.PlaceType.values()[position].getTag());
             }
 
             @Override
@@ -503,13 +302,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
         final List<String> priceDescriptionList = new ArrayList<>();
 
-        for (GooglePlacesRequestParams.PlacePrice placePrice : GooglePlacesRequestParams.PlacePrice.values()) {
+        for (GooglePlacesRequest.PlacePrice placePrice : GooglePlacesRequest.PlacePrice.values()) {
             priceDescriptionList.add(placePrice.getDescription());
         }
 
         IconAndTextAdapter priceIconAndTextAdapter =
                 new IconAndTextAdapter(
-                        getContext(),
+                        mContext,
                         R.layout.spinner_icon_and_text,
                         priceDescriptionList);
 
@@ -517,7 +316,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mBinding.mapFilter.filterPriceRangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
-                mPlacesRequest.setPrice(GooglePlacesRequestParams.PlacePrice.values()[position].getTag());
+                mPlacesRequest.setPrice(GooglePlacesRequest.PlacePrice.values()[position].getTag());
             }
 
             @Override
@@ -546,25 +345,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 getUserLastKnownLocationWithChecks();
             }
         });
-
     }
+    //endregion
 
-    private void setSearchCircle(int progress) {
-        mSearchCircle = mGoogleMap.addCircle(new CircleOptions()
-                .center(mCenterMarker.getPosition())
-                .radius(progress)
-                .strokeColor(ContextCompat.getColor(getContext(), R.color.colorAccent))
-                .fillColor(Color.TRANSPARENT));
-    }
-
-    private void canUseFilterActions(boolean enabled) {
-        mBinding.mapFilter.filterSearchButton.setEnabled(enabled);
-        mBinding.mapFilter.filterCancelButton.setEnabled(enabled);
-    }
-
-    private void showMapTutorial() {
+    //region Tutorials
+    @Override
+    public void showMapTutorial() {
         TutorialUtil.showDefaultTutorial(
-                getActivity(),
+                mActivity,
                 mBinding.getRoot().findViewById(R.id.map),
                 getString(R.string.mapFragment_marker_tutorial),
                 Constants.MAP_TUTORIAL, false);
@@ -572,9 +360,63 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private void showPriceFilterTutorial() {
         TutorialUtil.showDefaultTutorial(
-                getActivity(),
+                mActivity,
                 mBinding.mapFilter.filterPriceRangeCheckBox,
                 getString(R.string.mapFilter_priceRange_tutorial),
                 Constants.MAP_FILTER_TUTORIAL_PRICE, false);
     }
+    //endregion
+
+    //region Location permission and GPS
+    // TODO Try to remove this from the fragment
+    private boolean hasLocationPermission() {
+        if (ContextCompat.checkSelfPermission(mContext,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(mContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    Constants.LOCATION_PERMISSION_REQUEST_CODE);
+            return false;
+        }
+        return true;
+    }
+
+    public void requestGPS() {
+        final LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest).build();
+        SettingsClient client = LocationServices.getSettingsClient(mContext);
+
+        client.checkLocationSettings(settingsRequest)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        ApiException apiException = ((ApiException) e);
+                        if (apiException.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
+                            try {
+                                ResolvableApiException resolvable = (ResolvableApiException) e;
+                                startIntentSenderForResult(
+                                        resolvable.getResolution().getIntentSender(),
+                                        Constants.REQUEST_GPS_SETTINGS_CODE, null,
+                                        0, 0, 0, null);
+                            } catch (IntentSender.SendIntentException sendEx) {
+                                // Ignore this error
+                            }
+                        }
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
+                    @Override
+                    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                        if (locationSettingsResponse.getLocationSettingsStates().isLocationPresent() &&
+                                locationSettingsResponse.getLocationSettingsStates().isLocationUsable()) {
+                            onLocationAndGpsSuccess();
+                        }
+                    }
+                });
+    }
+    //endregion
 }
