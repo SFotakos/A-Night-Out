@@ -16,8 +16,6 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_home);
 
-        setSupportActionBar(mBinding.homeToolbar);
-
         mBinding.homeViewPager.setAdapter(
                 new HomeNavigationFragmentPagerAdapter(this, getSupportFragmentManager()));
 
