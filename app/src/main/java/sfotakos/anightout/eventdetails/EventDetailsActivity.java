@@ -34,7 +34,6 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
-import sfotakos.anightout.common.NetworkUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityEventDetailsBinding;
@@ -74,59 +73,30 @@ public class EventDetailsActivity extends AppCompatActivity {
                 mBinding.eventDetailsDateTimeTextView.setText(mEvent.getEventDate());
 
                 Place place = mEvent.getPlace();
-                if (place != null) {
-                    if (place.getPhotos() != null &&
-                            place.getPhotos().size() > 0 &&
-                            place.getPhotos().get(0).getPhotoReference() != null) {
-                        List<Uri> photosUri = new ArrayList<>();
-                        Uri photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
-                                .appendPath("photo")
-                                .appendQueryParameter("key", getResources().getString(R.string.google_places_key))
-                                .appendQueryParameter("maxheight", "400")
-                                .appendQueryParameter("photo_reference", place.getPhotos().get(0).getPhotoReference())
-                                .build();
+                //TODO fetch more photos from place details and add to the list
+                List<Place> places = new ArrayList<>();
+                places.add(place);
+                // TODO add snapping into position for a gallery like effect
+                // TODO add paging, something like https://stackoverflow.com/a/46084182
+                mBinding.placeDetails.placePhotosRv.setVisibility(View.VISIBLE);
+                mBinding.placeDetails.placePhotosRv.setAdapter(
+                        new PlacePhotosRvAdapter(places, true));
+                mBinding.placeDetails.placePhotosRv.setLayoutManager(
+                        new LinearLayoutManager(this,
+                                LinearLayoutManager.HORIZONTAL, false));
 
-                        photosUri.add(photoUri);
-                        // TODO add snapping into position for a gallery like effect
-                        // TODO add paging, something like https://stackoverflow.com/a/46084182
-                        mBinding.placeDetails.placePhotosRv.setVisibility(View.VISIBLE);
-                        mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(photosUri));
-                        mBinding.placeDetails.placePhotosRv.setLayoutManager(
-                                new LinearLayoutManager(this,
-                                        LinearLayoutManager.HORIZONTAL, false));
-                    } else {
-                        mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
-                    }
-
-                    if (place.getName() != null) {
-                        mBinding.placeDetails.placeNameTextView.setVisibility(View.VISIBLE);
-                        mBinding.placeDetails.placeNameTextView.setText(place.getName());
-                    } else {
-                        mBinding.placeDetails.placeNameTextView.setVisibility(View.GONE);
-                    }
-
-                    if (place.getVicinity() != null) {
-                        mBinding.placeDetails.placeAddressTextView.setVisibility(View.VISIBLE);
-                        mBinding.placeDetails.placeAddressTextView.setText(place.getVicinity());
-                    } else {
-                        mBinding.placeDetails.placeAddressTextView.setVisibility(View.GONE);
-                    }
-
-                    if (place.getPriceLevel() >= 0) {
-                        mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
-                        mBinding.placeDetails.placePriceTextView.setText(
-                                GooglePlacesRequest.PlacePrice.getDescriptionByTag(
-                                        Integer.toString(place.getPriceLevel())));
-                    } else {
-                        mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
-                    }
+                if (place.getPriceLevel() >= 0) {
+                    mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
+                    mBinding.placeDetails.placePriceTextView.setText(
+                            GooglePlacesRequest.PlacePrice.getDescriptionByTag(
+                                    Integer.toString(place.getPriceLevel())));
                 } else {
-                    mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
-                    mBinding.placeDetails.placeNameTextView.setVisibility(View.GONE);
-                    mBinding.placeDetails.placeAddressTextView.setVisibility(View.GONE);
-                    mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
                     mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
                 }
+            } else {
+                mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
+                mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
+                mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
             }
         }
     }

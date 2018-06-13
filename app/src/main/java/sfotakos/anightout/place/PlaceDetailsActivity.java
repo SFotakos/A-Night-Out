@@ -3,7 +3,6 @@ package sfotakos.anightout.place;
 import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -19,7 +18,6 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
-import sfotakos.anightout.common.NetworkUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
@@ -54,8 +52,8 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     throw new RuntimeException("Place data was not recovered properly");
                 }
 
-                mBinding.placeDetails.placeNameTextView.setText(mPlace.getName());
-                mBinding.placeDetails.placeAddressTextView.setText(mPlace.getVicinity());
+                getSupportActionBar().setTitle(mPlace.getName());
+                getSupportActionBar().setDisplayShowTitleEnabled(true);
 
                 if (mPlace.getPriceLevel() == null) {
                     mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
@@ -66,29 +64,17 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                                     mPlace.getPriceLevel().toString()));
                 }
 
-                // TODO move this to a request class which returns the fully qualified uri
-                if (mPlace.getPhotos() != null &&
-                        mPlace.getPhotos().size() != 0 &&
-                        mPlace.getPhotos().get(0) != null) {
-
-                    List<Uri> photosUri = new ArrayList<>();
-                    Uri photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
-                            .appendPath("photo")
-                            .appendQueryParameter("key", getResources().getString(R.string.google_places_key))
-                            .appendQueryParameter("maxheight", "400")
-                            .appendQueryParameter("photo_reference", mPlace.getPhotos().get(0).getPhotoReference())
-                            .build();
-
-                    photosUri.add(photoUri);
-
-                    mBinding.placeDetails.placePhotosRv.setVisibility(View.VISIBLE);
-                    mBinding.placeDetails.placePhotosRv.setAdapter(new PlacePhotosRvAdapter(photosUri));
-                    mBinding.placeDetails.placePhotosRv.setLayoutManager(
-                            new LinearLayoutManager(this,
-                                    LinearLayoutManager.HORIZONTAL, false));
-                } else {
-                    mBinding.placeDetails.placePhotosRv.setVisibility(View.GONE);
-                }
+                //TODO fetch more photos from place details and add to the list
+                List<Place> places = new ArrayList<>();
+                places.add(mPlace);
+                // TODO add snapping into position for a gallery like effect
+                // TODO add paging, something like https://stackoverflow.com/a/46084182
+                mBinding.placeDetails.placePhotosRv.setVisibility(View.VISIBLE);
+                mBinding.placeDetails.placePhotosRv.setAdapter(
+                        new PlacePhotosRvAdapter(places, false));
+                mBinding.placeDetails.placePhotosRv.setLayoutManager(
+                        new LinearLayoutManager(this,
+                                LinearLayoutManager.HORIZONTAL, false));
             }
         }
     }
@@ -114,6 +100,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                             new Intent(PlaceDetailsActivity.this, NewEventActivity.class);
                     newEventIntent.setAction(Constants.PLACE_DETAILS_ACTIVITY_PARENT);
                     startActivityForResult(newEventIntent, Constants.NEW_EVENT_RESULT_CODE);
+
                     if (mEventsDialog != null) {
                         mEventsDialog.dismiss();
                     }
@@ -129,7 +116,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                             if (mEventsDialog != null) {
                                 mEventsDialog.dismiss();
                             }
-                            navigateToEvent();
+
                         }
 
                     }, Event.queryEvents(getContentResolver())));
@@ -157,9 +144,9 @@ public class PlaceDetailsActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void navigateToEvent(){
+    private void navigateToEvent() {
         Intent returnIntent = new Intent();
         setResult(Activity.RESULT_OK, returnIntent);
-        finish();
+        onNavigateUp();
     }
 }

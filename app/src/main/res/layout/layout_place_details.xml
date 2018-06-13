@@ -16,34 +16,12 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/placeName_textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_default"
-            android:layout_marginTop="@dimen/margin_half"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/placePhotos_rv" />
-
-        <TextView
             android:id="@+id/placePrice_textView"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_default"
-            android:layout_marginTop="@dimen/margin_half"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/placeName_textView" />
-
-        <TextView
-            android:id="@+id/placeAddress_textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_default"
-            android:layout_marginTop="@dimen/margin_half"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/placePrice_textView" />
+            android:layout_marginEnd="@dimen/margin_default"
+            app:layout_constraintEnd_toEndOf="@+id/placePhotos_rv"
+            app:layout_constraintTop_toBottomOf="@+id/placePhotos_rv" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>

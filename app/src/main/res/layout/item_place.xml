@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/margin_default">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/itemPlace_photo_imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/itemPlace_name_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/material_color_black_38_percent"
+            android:padding="@dimen/padding_half"
+            android:textColor="@color/material_color_white"
+            android:textSize="@dimen/text_title"
+            app:layout_constraintEnd_toEndOf="@+id/itemPlace_photo_imageView"
+            app:layout_constraintStart_toStartOf="@+id/itemPlace_photo_imageView"
+            app:layout_constraintTop_toTopOf="@+id/itemPlace_photo_imageView" />
+
+        <TextView
+            android:id="@+id/itemPlace_address_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/material_color_black_38_percent"
+            android:padding="@dimen/padding_half"
+            android:textColor="@color/material_color_white"
+            android:textSize="@dimen/text_subheading"
+            app:layout_constraintBottom_toBottomOf="@+id/itemPlace_photo_imageView"
+            app:layout_constraintEnd_toEndOf="@+id/itemPlace_photo_imageView"
+            app:layout_constraintStart_toStartOf="@+id/itemPlace_photo_imageView" />
+
+    </android.support.constraint.ConstraintLayout>
+</android.support.v7.widget.CardView>

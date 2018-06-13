@@ -8,19 +8,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.NetworkUtil;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 
 public class PlacePhotosRvAdapter extends RecyclerView.Adapter<PlacePhotosRvAdapter.PhotosViewHolder> {
 
-    private List<Uri> placePhotos;
+    private List<Place> places;
+    private boolean shouldDisplayName;
 
-    public PlacePhotosRvAdapter(List<Uri> placePhotos) {
-        this.placePhotos = placePhotos;
+    public PlacePhotosRvAdapter(List<Place> placeList, boolean shouldDisplayName) {
+        this.places = placeList;
+        this.shouldDisplayName = shouldDisplayName;
     }
 
     @NonNull
@@ -28,30 +33,55 @@ public class PlacePhotosRvAdapter extends RecyclerView.Adapter<PlacePhotosRvAdap
     public PhotosViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.item_place_photo, parent, false);
+        View view = inflater.inflate(R.layout.item_place, parent, false);
         return new PhotosViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull PhotosViewHolder holder, int position) {
-        Uri uri = placePhotos.get(position);
+        Place place = places.get(position);
+        Context context = holder.mPlacePhoto.getContext();
 
-        Picasso.get().load(uri)
-                .placeholder(android.R.drawable.gallery_thumb)
-                .into(holder.mPlacePhoto);
+        if (place.getPhotos() != null &&
+                place.getPhotos().size() > 0 &&
+                place.getPhotos().get(0).getPhotoReference() != null) {
+            // TODO move this to a request class which returns the fully qualified uri
+            Uri photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
+                    .appendPath("photo")
+                    .appendQueryParameter("key", context.getString(R.string.google_places_key))
+                    .appendQueryParameter("maxheight", "400")
+                    .appendQueryParameter("photo_reference", place.getPhotos().get(0).getPhotoReference())
+                    .build();
+            Picasso.get().load(photoUri)
+                    .placeholder(android.R.drawable.gallery_thumb)
+                    .into(holder.mPlacePhoto);
+        }
+
+        if (shouldDisplayName) {
+            holder.mPlaceName.setText(place.getName());
+            holder.mPlaceName.setVisibility(View.VISIBLE);
+        } else {
+            holder.mPlaceName.setVisibility(View.GONE);
+        }
+
+        holder.mPlaceAddress.setText(place.getVicinity());
     }
 
     @Override
     public int getItemCount() {
-        return placePhotos.size();
+        return places.size();
     }
 
     class PhotosViewHolder extends RecyclerView.ViewHolder {
         ImageView mPlacePhoto;
+        TextView mPlaceName;
+        TextView mPlaceAddress;
 
         PhotosViewHolder(View itemView) {
             super(itemView);
             mPlacePhoto = itemView.findViewById(R.id.itemPlace_photo_imageView);
+            mPlaceName = itemView.findViewById(R.id.itemPlace_name_textView);
+            mPlaceAddress = itemView.findViewById(R.id.itemPlace_address_textView);
         }
     }
 }
