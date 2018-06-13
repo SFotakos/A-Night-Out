@@ -2,6 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 android {
+    signingConfigs {
+        release {
+            keyAlias 'Android Nanodegree'
+            keyPassword 'Udacity'
+            storeFile file("$rootDir/NanodegreeKeystore.jks")
+            storePassword 'Udacity'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "sfotakos.anightout"
@@ -17,41 +25,34 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:exifinterface:27.1.1'
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
-
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.google.maps.android:android-maps-utils:0.5'
     implementation 'com.android.support:support-media-compat:27.1.1'
-
     implementation 'com.squareup.picasso:picasso:2.71828'
-
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
-
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     implementation 'com.android.support:support-vector-drawable:27.1.1'
-
     implementation 'com.google.firebase:firebase-crash:16.0.0'
     implementation 'com.google.firebase:firebase-core:16.0.0'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.3'
-
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
     implementation 'blue.aodev:material-values:1.1.1'
-
     implementation 'com.github.iammert:MaterialIntroView:1.6.0'
 }
 
