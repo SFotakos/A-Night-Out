@@ -21,7 +21,7 @@ import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
-import sfotakos.anightout.databinding.LayoutAddEventBinding;
+import sfotakos.anightout.databinding.DialogEventsBinding;
 import sfotakos.anightout.eventdetails.PlacePhotosRvAdapter;
 import sfotakos.anightout.events.EventsRvAdapter;
 import sfotakos.anightout.newevent.NewEventActivity;
@@ -89,9 +89,9 @@ public class PlaceDetailsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_add_to_event) {
-            final LayoutAddEventBinding dialogBinding =
+            final DialogEventsBinding dialogBinding =
                     DataBindingUtil.inflate(getLayoutInflater(),
-                            R.layout.layout_add_event, null, false);
+                            R.layout.dialog_events, null, false);
 
             dialogBinding.addEventRootCardView.setOnClickListener(new View.OnClickListener() {
                 @Override
