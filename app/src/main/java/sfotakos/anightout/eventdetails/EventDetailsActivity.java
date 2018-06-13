@@ -66,12 +66,25 @@ public class EventDetailsActivity extends AppCompatActivity {
                 ActionBar actionBar = getSupportActionBar();
                 if (actionBar != null) {
                     actionBar.setDisplayHomeAsUpEnabled(true);
-                    actionBar.setTitle(mEvent.getEventName());
+
                 }
 
                 mBinding.eventDetailsDescriptionTextView.setText(mEvent.getEventDescription());
-                mBinding.eventDetailsDateTextView.setText(mEvent.getEventDate());
-                mBinding.eventDetailsTimeTextView.setText(mEvent.getEventTime());
+
+                StringBuilder titleSb = new StringBuilder();
+                titleSb.append(mEvent.getEventName());
+                if (mBinding.eventDetailsDateTextView != null) {
+                    mBinding.eventDetailsDateTextView.setText(mEvent.getEventDate());
+                } else {
+                    titleSb.append(" - ").append(mEvent.getEventDate()).append(" ");
+                }
+
+                if (mBinding.eventDetailsTimeTextView != null) {
+                    mBinding.eventDetailsTimeTextView.setText(mEvent.getEventTime());
+                } else {
+                    titleSb.append(mEvent.getEventTime());
+                }
+                getSupportActionBar().setTitle(titleSb.toString());
 
                 Place place = mEvent.getPlace();
                 //TODO fetch more photos from place details and add to the list
