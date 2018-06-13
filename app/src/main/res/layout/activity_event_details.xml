@@ -32,17 +32,29 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/eventDetails_date_textView" />
+
+            <TextView
+                android:id="@+id/eventDetails_date_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_half"
+                android:layout_marginTop="@dimen/margin_half"
+                android:textSize="@dimen/text_subheading"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@+id/eventDetails_time_textView"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/eventDetails_dateTime_textView"
-                android:layout_width="match_parent"
+                android:id="@+id/eventDetails_time_textView"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_default"
-                android:layout_marginTop="@dimen/margin_half"
+                android:layout_marginEnd="@dimen/margin_default"
+                android:textSize="@dimen/text_subheading"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/eventDetails_date_textView"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/placeDetails" />
+                app:layout_constraintTop_toTopOf="@+id/eventDetails_date_textView" />
 
             <TextView
                 android:id="@+id/eventDetails_description_textView"
@@ -50,9 +62,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_default"
                 android:layout_marginTop="@dimen/margin_half"
+                android:textSize="@dimen/text_subheading"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/eventDetails_dateTime_textView" />
+                app:layout_constraintTop_toBottomOf="@+id/placeDetails" />
 
         </android.support.constraint.ConstraintLayout>
 

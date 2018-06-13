@@ -70,7 +70,8 @@ public class EventDetailsActivity extends AppCompatActivity {
                 }
 
                 mBinding.eventDetailsDescriptionTextView.setText(mEvent.getEventDescription());
-                mBinding.eventDetailsDateTimeTextView.setText(mEvent.getEventDate());
+                mBinding.eventDetailsDateTextView.setText(mEvent.getEventDate());
+                mBinding.eventDetailsTimeTextView.setText(mEvent.getEventTime());
 
                 Place place = mEvent.getPlace();
                 //TODO fetch more photos from place details and add to the list
