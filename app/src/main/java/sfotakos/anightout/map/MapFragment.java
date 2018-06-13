@@ -46,13 +46,18 @@ import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.IconAndTextAdapter;
 import sfotakos.anightout.common.MapHelper;
 import sfotakos.anightout.common.MapState;
+import sfotakos.anightout.common.PlaceClusterManager;
 import sfotakos.anightout.common.TutorialUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
+import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.FragmentMapBinding;
+import sfotakos.anightout.home.HomeActivity;
+import sfotakos.anightout.place.PlaceDetailsActivity;
 
 import static android.app.Activity.RESULT_OK;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelper.IMapHelper {
+public class MapFragment extends Fragment implements OnMapReadyCallback,
+        MapHelper.IMapHelper, PlaceClusterManager.IPlaceClusterManager {
 
      // This is a workaround so SeekBar has a min value
 
@@ -150,6 +155,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
             if (resultCode == RESULT_OK) {
                 mMapHelper.requestLocationUpdates(mFusedLocationClient);
             }
+        } else if (requestCode == Constants.PLACE_ADDED_TO_EVENT_RESULT_CODE){
+            if (resultCode == RESULT_OK){
+                // TODO this is absurdly coupled, change this..
+                ((HomeActivity ) getActivity()).navigateToTab(Constants.HomeTabs.EVENT_TAB);
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -157,7 +167,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMapHelper.setGoogleMap(googleMap);
+        mMapHelper.setGoogleMap(googleMap, this);
         mBinding.mapCenterPositionImageButton.setVisibility(View.VISIBLE);
     }
 
@@ -422,6 +432,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapHelp
                         }
                     }
                 });
+    }
+
+    @Override
+    public void placeClicked(Place place) {
+        Intent placeDetailsIntent = new Intent(mContext, PlaceDetailsActivity.class);
+        placeDetailsIntent.putExtra(Constants.PLACE_EXTRA, place);
+        startActivityForResult(placeDetailsIntent, Constants.PLACE_ADDED_TO_EVENT_RESULT_CODE);
     }
     //endregion
 }

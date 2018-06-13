@@ -1,7 +1,6 @@
 package sfotakos.anightout.common;
 
 import android.content.Context;
-import android.content.Intent;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
@@ -13,18 +12,19 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
-import sfotakos.anightout.place.PlaceDetailsActivity;
 
 public class PlaceClusterManager<PlaceClusterItem extends ClusterItem> extends ClusterManager<PlaceClusterItem> {
 
     private final PlaceClusterRenderer mPlaceClusterRenderer;
     private Context mContext;
+    private IPlaceClusterManager placeClusterManager;
 
     private HashMap<String, Place> searchedPlaces = new HashMap<>();
 
-    public PlaceClusterManager(Context context, GoogleMap map) {
+    public PlaceClusterManager(Context context, GoogleMap map, IPlaceClusterManager placeClusterManager) {
         super(context, map);
         this.mContext = context;
+        this.placeClusterManager = placeClusterManager;
 
         // TODO change this monstrosity
         this.mPlaceClusterRenderer = new PlaceClusterRenderer(context, map,
@@ -56,9 +56,7 @@ public class PlaceClusterManager<PlaceClusterItem extends ClusterItem> extends C
         if (searchedPlaces != null) {
             Place place = searchedPlaces.get(clickedMarker.getId());
             if (place != null) {
-                Intent placeDetailsIntent = new Intent(mContext, PlaceDetailsActivity.class);
-                placeDetailsIntent.putExtra(Constants.PLACE_EXTRA, place);
-                mContext.startActivity(placeDetailsIntent);
+                placeClusterManager.placeClicked(place);
             }
         }
         return true;
@@ -66,5 +64,9 @@ public class PlaceClusterManager<PlaceClusterItem extends ClusterItem> extends C
 
     public void addToSearchedPlaces(Marker placeMarker, Place place){
         searchedPlaces.put(placeMarker.getId(), place);
+    }
+
+    public interface IPlaceClusterManager {
+        void placeClicked(Place place);
     }
 }

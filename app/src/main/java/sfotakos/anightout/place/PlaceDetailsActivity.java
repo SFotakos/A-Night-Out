@@ -114,7 +114,6 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                             new Intent(PlaceDetailsActivity.this, NewEventActivity.class);
                     newEventIntent.setAction(Constants.PLACE_DETAILS_ACTIVITY_PARENT);
                     startActivityForResult(newEventIntent, Constants.NEW_EVENT_RESULT_CODE);
-
                     if (mEventsDialog != null) {
                         mEventsDialog.dismiss();
                     }
@@ -130,6 +129,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                             if (mEventsDialog != null) {
                                 mEventsDialog.dismiss();
                             }
+                            navigateToEvent();
                         }
 
                     }, Event.queryEvents(getContentResolver())));
@@ -150,9 +150,16 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                 long eventId = data.getLongExtra(Constants.SAVED_EVENT_ID_EXTRA, -1);
                 if (eventId != -1) {
                     Event.updateEventWithPlace(getContentResolver(), Long.toString(eventId), mPlace);
+                    navigateToEvent();
                 }
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void navigateToEvent(){
+        Intent returnIntent = new Intent();
+        setResult(Activity.RESULT_OK, returnIntent);
+        finish();
     }
 }

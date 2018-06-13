@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.databinding.ActivityHomeBinding;
 
 public class HomeActivity extends AppCompatActivity {
@@ -20,5 +21,9 @@ public class HomeActivity extends AppCompatActivity {
                 new HomeNavigationFragmentPagerAdapter(this, getSupportFragmentManager()));
 
         mBinding.homeTabLayout.setupWithViewPager(mBinding.homeViewPager);
+    }
+
+    public void navigateToTab(Constants.HomeTabs homeTabs){
+        mBinding.homeViewPager.setCurrentItem(homeTabs.getTabPosition());
     }
 }

@@ -200,7 +200,8 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
         return mapState;
     }
 
-    public void setGoogleMap(GoogleMap googleMap) {
+    public void setGoogleMap(GoogleMap googleMap,
+                             PlaceClusterManager.IPlaceClusterManager placeClusterManager) {
         if (mGoogleMap != null){
             mGoogleMap.clear();
         }
@@ -218,7 +219,7 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
             }
         });
 
-        mClusterManager = new PlaceClusterManager<>(mContext, mGoogleMap);
+        mClusterManager = new PlaceClusterManager<>(mContext, mGoogleMap, placeClusterManager);
         mClusterManager.setRenderer(new PlaceClusterRenderer(mContext, mGoogleMap, mClusterManager));
         mGoogleMap.setOnCameraIdleListener(mClusterManager);
         mGoogleMap.setOnMarkerClickListener(mClusterManager);
