@@ -1,4 +1,4 @@
-package sfotakos.anightout.common;
+package sfotakos.anightout.common.google_maps_places_photos_api;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;

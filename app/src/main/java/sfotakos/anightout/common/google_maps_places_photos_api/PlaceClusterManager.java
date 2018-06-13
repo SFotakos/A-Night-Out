@@ -1,4 +1,4 @@
-package sfotakos.anightout.common;
+package sfotakos.anightout.common.google_maps_places_photos_api;
 
 import android.content.Context;
 
@@ -28,7 +28,7 @@ public class PlaceClusterManager<PlaceClusterItem extends ClusterItem> extends C
 
         // TODO change this monstrosity
         this.mPlaceClusterRenderer = new PlaceClusterRenderer(context, map,
-                (PlaceClusterManager<sfotakos.anightout.common.PlaceClusterItem>) this);
+                (PlaceClusterManager<sfotakos.anightout.common.google_maps_places_photos_api.PlaceClusterItem>) this);
         this.setRenderer((ClusterRenderer<PlaceClusterItem>) this.mPlaceClusterRenderer);
     }
 

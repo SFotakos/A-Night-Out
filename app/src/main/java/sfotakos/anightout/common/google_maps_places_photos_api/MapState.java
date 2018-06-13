@@ -1,12 +1,9 @@
-package sfotakos.anightout.common;
+package sfotakos.anightout.common.google_maps_places_photos_api;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
-
-import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesPlaceResponse;
-import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 
 public class MapState implements Parcelable {
     public static final int MIN_SEARCH_RADIUS = 100;

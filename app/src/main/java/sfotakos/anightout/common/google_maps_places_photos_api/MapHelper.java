@@ -1,4 +1,4 @@
-package sfotakos.anightout.common;
+package sfotakos.anightout.common.google_maps_places_photos_api;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -31,8 +31,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import sfotakos.anightout.R;
-import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesPlaceResponse;
-import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
+import sfotakos.anightout.common.DrawableUtils;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 
 public class MapHelper implements GoogleMap.CancelableCallback, Callback<GooglePlacesPlaceResponse> {
