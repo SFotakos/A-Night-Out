@@ -42,20 +42,23 @@ public class PlacePhotosRvAdapter extends RecyclerView.Adapter<PlacePhotosRvAdap
         Place place = places.get(position);
         Context context = holder.mPlacePhoto.getContext();
 
+        Uri photoUri;
         if (place.getPhotos() != null &&
                 place.getPhotos().size() > 0 &&
                 place.getPhotos().get(0).getPhotoReference() != null) {
             // TODO move this to a request class which returns the fully qualified uri
-            Uri photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
+            photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
                     .appendPath("photo")
                     .appendQueryParameter("key", context.getString(R.string.google_places_key))
                     .appendQueryParameter("maxheight", "400")
                     .appendQueryParameter("photo_reference", place.getPhotos().get(0).getPhotoReference())
                     .build();
-            Picasso.get().load(photoUri)
-                    .placeholder(android.R.drawable.gallery_thumb)
-                    .into(holder.mPlacePhoto);
+        } else {
+            photoUri = Uri.parse("https://picsum.photos/400/400/?image=56").buildUpon().build();
         }
+        Picasso.get().load(photoUri)
+                .placeholder(android.R.drawable.gallery_thumb)
+                .into(holder.mPlacePhoto);
 
         if (shouldDisplayName) {
             holder.mPlaceName.setText(place.getName());
