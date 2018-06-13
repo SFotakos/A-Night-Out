@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
@@ -21,16 +20,15 @@ import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
-import sfotakos.anightout.databinding.DialogEventsBinding;
 import sfotakos.anightout.eventdetails.PlacePhotosRvAdapter;
-import sfotakos.anightout.events.EventsRvAdapter;
+import sfotakos.anightout.events.EventsDialog;
 import sfotakos.anightout.newevent.NewEventActivity;
 
 //TODO query place details and fill layout with more information
-public class PlaceDetailsActivity extends AppCompatActivity {
+public class PlaceDetailsActivity extends AppCompatActivity implements EventsDialog.IEventsDialog {
 
     private ActivityPlaceDetailsBinding mBinding;
-    private AlertDialog mEventsDialog;
+    private EventsDialog mEventsDialog;
     private Place mPlace;
 
     @Override
@@ -89,42 +87,8 @@ public class PlaceDetailsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_add_to_event) {
-            final DialogEventsBinding dialogBinding =
-                    DataBindingUtil.inflate(getLayoutInflater(),
-                            R.layout.dialog_events, null, false);
-
-            dialogBinding.addEventRootCardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent newEventIntent =
-                            new Intent(PlaceDetailsActivity.this, NewEventActivity.class);
-                    newEventIntent.setAction(Constants.PLACE_DETAILS_ACTIVITY_PARENT);
-                    startActivityForResult(newEventIntent, Constants.NEW_EVENT_RESULT_CODE);
-
-                    if (mEventsDialog != null) {
-                        mEventsDialog.dismiss();
-                    }
-                }
-            });
-
-            dialogBinding.addEventEventsRv
-                    .setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
-                        @Override
-                        public void eventClicked(Event event) {
-                            Event.updateEventWithPlace(getContentResolver(),
-                                    Long.toString(event.getEventId()), mPlace);
-                            if (mEventsDialog != null) {
-                                mEventsDialog.dismiss();
-                            }
-
-                        }
-
-                    }, Event.queryEvents(getContentResolver())));
-            dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(this));
-
-            mEventsDialog = new AlertDialog.Builder(this)
-                    .setTitle(getString(R.string.placeDetails_eventsDialog_title))
-                    .setView(dialogBinding.getRoot()).show();
+            mEventsDialog = EventsDialog.newInstance(mPlace);
+            mEventsDialog.show(getFragmentManager(), "EventsDialogFragment");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -144,9 +108,22 @@ public class PlaceDetailsActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void eventClicked(Event event) {
+        Event.updateEventWithPlace(getContentResolver(), Long.toString(event.getEventId()), mPlace);
+        navigateToEvent();
+    }
+
+    @Override
+    public void newEventClicked() {
+        Intent newEventIntent = new Intent(this, NewEventActivity.class);
+        newEventIntent.setAction(Constants.PLACE_DETAILS_ACTIVITY_PARENT);
+        startActivityForResult(newEventIntent, Constants.NEW_EVENT_RESULT_CODE);
+    }
+
     private void navigateToEvent() {
         Intent returnIntent = new Intent();
         setResult(Activity.RESULT_OK, returnIntent);
-        onNavigateUp();
+        finish();
     }
 }
