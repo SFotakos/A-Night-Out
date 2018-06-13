@@ -6,7 +6,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
-        android:padding="@dimen/padding_default">
+        android:paddingBottom="@dimen/padding_half"
+        android:paddingEnd="@dimen/padding_default"
+        android:paddingStart="@dimen/padding_default"
+        android:paddingTop="@dimen/padding_half">
 
         <!-- TODO Group common view using meta group from constrain layout -->
         <android.support.v7.widget.AppCompatImageView
@@ -34,14 +37,23 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/filter_priceRange_spinner" />
 
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/filter_place_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_half"
+            app:layout_constraintEnd_toEndOf="@+id/filter_priceRange_spinner"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/filter_priceRange_imageView" />
+
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/filter_distance_imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_default"
+            android:layout_marginTop="@dimen/margin_half"
             android:tint="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/filter_priceRange_imageView"
+            app:layout_constraintTop_toBottomOf="@+id/filter_place_spinner"
             app:srcCompat="@drawable/ic_distance" />
 
         <SeekBar
@@ -51,6 +63,7 @@
             android:max="800"
             android:maxWidth="250dp"
             android:minWidth="100dp"
+            app:layout_constraintBottom_toBottomOf="@+id/filter_distance_imageView"
             app:layout_constraintEnd_toStartOf="@+id/filter_distance_textView"
             app:layout_constraintStart_toEndOf="@+id/filter_distance_imageView"
             app:layout_constraintTop_toTopOf="@+id/filter_distance_imageView" />
@@ -58,44 +71,31 @@
         <TextView
             android:id="@+id/filter_distance_textView"
             android:layout_width="0dp"
-            android:textSize="@dimen/text_subheading"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/filter_distance_seekBar"
+            android:textSize="@dimen/text_subheading"
+            app:layout_constraintBottom_toBottomOf="@+id/filter_distance_imageView"
+            app:layout_constraintEnd_toEndOf="@+id/filter_priceRange_checkBox"
             app:layout_constraintTop_toTopOf="@+id/filter_distance_imageView" />
-
-        <android.support.v7.widget.AppCompatSpinner
-            android:id="@+id/filter_place_spinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_default"
-            app:layout_constraintEnd_toEndOf="@+id/filter_priceRange_spinner"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/filter_distance_imageView" />
 
         <Button
             android:id="@+id/filter_cancel_button"
             style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/margin_default"
-            android:layout_marginTop="@dimen/margin_default"
             android:text="@string/any_cancel"
             app:layout_constraintEnd_toStartOf="@id/filter_search_button"
-            app:layout_constraintTop_toBottomOf="@+id/filter_place_spinner"
+            app:layout_constraintTop_toBottomOf="@+id/filter_distance_textView"
             app:layout_constraintWidth_default="spread" />
 
         <Button
             android:id="@+id/filter_search_button"
             style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/margin_default"
-            android:layout_marginTop="@dimen/margin_default"
             android:text="@string/any_search"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/filter_place_spinner"
+            app:layout_constraintTop_toBottomOf="@+id/filter_distance_textView"
             app:layout_constraintWidth_default="spread" />
 
     </android.support.constraint.ConstraintLayout>
