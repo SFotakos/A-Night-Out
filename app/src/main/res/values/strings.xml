@@ -8,6 +8,7 @@
     <string name="newEvent_eventName_invalidInput">Event name has to be at least %d characters long</string>
     <string name="newEvent_eventDatePickerDialog_title">Select event date</string>
     <string name="newEvent_eventTimePickerDialog_title">Select event time</string>
+    <string name="newEvent_saving_error">There was a problem saving the event, please try again</string>
 
     <string name="eventDetails_menuItem_share_title">Share</string>
     <string name="eventDetails_menuItem_delete_title">Delete event</string>
@@ -37,6 +38,11 @@
 
     <string name="accessibility_eventItem_eventName">Event name: %s</string>
     <string name="accessibility_events_newEventFab">Create event</string>
-    <string name="newEvent_saving_error">There was a problem saving the event, please try again</string>
+
+    <string name="googlePlace_price_free">Free</string>
+    <string name="googlePlace_price_cheap">Cheap</string>
+    <string name="googlePlace_price_moderate">Moderate</string>
+    <string name="googlePlace_price_expensive">Expensive</string>
+    <string name="googlePlace_price_veryExpensive">Very Expensive</string>
 
 </resources>

@@ -101,9 +101,9 @@ public class EventDetailsActivity extends AppCompatActivity {
 
                 if (place.getPriceLevel() >= 0) {
                     mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
-                    mBinding.placeDetails.placePriceTextView.setText(
+                    mBinding.placeDetails.placePriceTextView.setText(getString(
                             GooglePlacesRequest.PlacePrice.getDescriptionByTag(
-                                    Integer.toString(place.getPriceLevel())));
+                                    Integer.toString(place.getPriceLevel()))));
                 } else {
                     mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
                 }

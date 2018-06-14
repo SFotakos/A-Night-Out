@@ -27,7 +27,6 @@ public class GooglePlacesRequest {
         placesCall.enqueue(callback);
     }
 
-
     // TODO make description strings.xml resources
     public enum PlaceType {
 
@@ -64,42 +63,38 @@ public class GooglePlacesRequest {
         public int getIconResId() {
             return iconResId;
         }
-
-        public void setIconResId(int iconResId) {
-            this.iconResId = iconResId;
-        }
     }
 
     public enum PlacePrice {
 
-        FREE("Free", "0"),
-        CHEAP("Cheap", "1"),
-        MODERATE("Moderate", "2"),
-        EXPENSIVE("Expensive", "3"),
-        VERYEXPENSIVE("Very Expensive", "4");
+        FREE(R.string.googlePlace_price_free, "0"),
+        CHEAP(R.string.googlePlace_price_cheap, "1"),
+        MODERATE(R.string.googlePlace_price_moderate, "2"),
+        EXPENSIVE(R.string.googlePlace_price_expensive, "3"),
+        VERYEXPENSIVE(R.string.googlePlace_price_veryExpensive, "4");
 
-        private String description;
+        private int descriptionRes;
         private String tag;
 
-        PlacePrice(String description, String tag) {
-            this.description = description;
+        PlacePrice(int description, String tag) {
+            this.descriptionRes = description;
             this.tag = tag;
         }
 
-        public static String getDescriptionByTag(String tag) {
+        public static int getDescriptionByTag(String tag) {
             for (PlacePrice placePrice : PlacePrice.values()) {
                 if (placePrice.tag.equals(tag))
-                    return placePrice.description;
+                    return placePrice.descriptionRes;
             }
             throw new InvalidParameterException();
         }
 
-        public String getDescription() {
-            return description;
+        public int getDescription() {
+            return descriptionRes;
         }
 
-        public void setDescription(String description) {
-            this.description = description;
+        public void setDescription(int descriptionRes) {
+            this.descriptionRes = descriptionRes;
         }
 
         public String getTag() {

@@ -266,7 +266,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         togglePriceFilteringViewState(mMapHelper.getMapState().isPriceSearchingEnabled());
         final List<String> priceDescriptionList = new ArrayList<>();
         for (GooglePlacesRequest.PlacePrice placePrice : GooglePlacesRequest.PlacePrice.values()) {
-            priceDescriptionList.add(placePrice.getDescription());
+            priceDescriptionList.add(getString(placePrice.getDescription()));
         }
         IconAndTextAdapter priceIconAndTextAdapter = new IconAndTextAdapter(mContext,
                 R.layout.spinner_icon_and_text, priceDescriptionList);

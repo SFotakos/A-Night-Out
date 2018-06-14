@@ -57,9 +57,9 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
                     mBinding.placeDetails.placePriceTextView.setVisibility(View.GONE);
                 } else {
                     mBinding.placeDetails.placePriceTextView.setVisibility(View.VISIBLE);
-                    mBinding.placeDetails.placePriceTextView.setText(
+                    mBinding.placeDetails.placePriceTextView.setText(getString(
                             GooglePlacesRequest.PlacePrice.getDescriptionByTag(
-                                    mPlace.getPriceLevel().toString()));
+                                    Integer.toString(mPlace.getPriceLevel()))));
                 }
 
                 //TODO fetch more photos from place details and add to the list
