@@ -1,10 +1,12 @@
 package sfotakos.anightout.events;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Display;
 import android.view.Gravity;
@@ -13,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
+import java.util.List;
+
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
@@ -20,9 +24,10 @@ import sfotakos.anightout.common.LocalRepository;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.DialogEventsBinding;
 
-public class EventsDialog extends DialogFragment {
+public class EventsDialog extends DialogFragment implements LocalRepository.ILocalRepositoryCallback {
 
     private Place mPlace;
+    DialogEventsBinding dialogBinding;
     private IEventsDialog eventsDialogListener;
 
     public static EventsDialog newInstance(Place place) {
@@ -43,9 +48,8 @@ public class EventsDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        final DialogEventsBinding dialogBinding =
-                DataBindingUtil.inflate(inflater,
-                        R.layout.dialog_events, null, false);
+        dialogBinding = DataBindingUtil.inflate(inflater,
+                R.layout.dialog_events, null, false);
 
         dialogBinding.addEventRootCardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,17 +59,14 @@ public class EventsDialog extends DialogFragment {
             }
         });
 
-        dialogBinding.addEventEventsRv
-                .setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
-                    @Override
-                    public void eventClicked(Event event) {
-                        dismiss();
-                        eventsDialogListener.eventClicked(event);
-                    }
-
-                }, LocalRepository.queryEvents(getActivity().getContentResolver())));
         dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        Activity activity = getActivity();
+        if (activity instanceof AppCompatActivity) {
+            ((AppCompatActivity) activity).getSupportLoaderManager().initLoader(
+                    Constants.LOADER_EVENTS, null,
+                    new LocalRepository(getActivity(), this));
+        }
         return dialogBinding.getRoot();
     }
 
@@ -95,6 +96,17 @@ public class EventsDialog extends DialogFragment {
         }
     }
 
+    @Override
+    public void onEventListObtained(List<Event> events) {
+        dialogBinding.addEventEventsRv
+                .setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
+                    @Override
+                    public void eventClicked(Event event) {
+                        dismiss();
+                        eventsDialogListener.eventClicked(event);
+                    }
+                }, events));
+    }
 
     public interface IEventsDialog {
         void eventClicked(Event event);

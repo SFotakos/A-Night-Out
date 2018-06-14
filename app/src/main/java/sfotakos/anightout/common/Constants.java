@@ -1,6 +1,8 @@
 package sfotakos.anightout.common;
 
 public class Constants {
+    public final static int LOADER_EVENTS = 98563;
+
     public final static String PLACE_EXTRA = "placeDetails_placeExtra";
     public final static String EVENT_EXTRA = "eventDetails_eventExtra";
     public final static String SAVED_EVENT_ID_EXTRA = "savedEventId";

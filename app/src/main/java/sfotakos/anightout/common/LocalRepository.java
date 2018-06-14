@@ -3,9 +3,15 @@ package sfotakos.anightout.common;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +20,12 @@ import sfotakos.anightout.common.data.NightOutContract.EventEntry;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Photo;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 
-public class LocalRepository {
+import static sfotakos.anightout.common.Constants.LOADER_EVENTS;
+
+public class LocalRepository implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private Context mContext;
+    private ILocalRepositoryCallback listener;
 
     private static Uri getEventByIdUri(@NonNull String eventId) {
         return EventEntry.CONTENT_URI.buildUpon()
@@ -31,52 +42,43 @@ public class LocalRepository {
                 null);
     }
 
-    public static List<Event> queryEvents(@NonNull ContentResolver contentResolver) {
+    private List<Event> returnEvents(@NonNull Cursor cursor) {
+        cursor.moveToFirst();
         List<Event> eventList = new ArrayList<>();
-        Cursor cursor = contentResolver.query(
-                EventEntry.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
+        while (cursor.moveToNext()) {
+            Event event = new Event();
+            int eventIdIndex = cursor.getColumnIndex(EventEntry.EVENT_ID);
+            int eventNameIndex = cursor.getColumnIndex(EventEntry.EVENT_NAME);
+            int eventDateIndex = cursor.getColumnIndex(EventEntry.EVENT_DATE);
+            int eventTimeIndex = cursor.getColumnIndex(EventEntry.EVENT_TIME);
+            int eventDescriptionIndex = cursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                Event event = new Event();
-                int eventIdIndex = cursor.getColumnIndex(EventEntry.EVENT_ID);
-                int eventNameIndex = cursor.getColumnIndex(EventEntry.EVENT_NAME);
-                int eventDateIndex = cursor.getColumnIndex(EventEntry.EVENT_DATE);
-                int eventTimeIndex = cursor.getColumnIndex(EventEntry.EVENT_TIME);
-                int eventDescriptionIndex = cursor.getColumnIndex(EventEntry.EVENT_DESCRIPTION);
+            int placeIdIndex = cursor.getColumnIndex(EventEntry.PLACE_ID);
+            int placeNameIndex = cursor.getColumnIndex(EventEntry.PLACE_NAME);
+            int placePhotoRefIndex = cursor.getColumnIndex(EventEntry.PLACE_PHOTO_REF);
+            int placePriceRangeIndex = cursor.getColumnIndex(EventEntry.PLACE_PRICE_RANGE);
+            int placeAddressIndex = cursor.getColumnIndex(EventEntry.PLACE_ADDRESS);
 
-                int placeIdIndex = cursor.getColumnIndex(EventEntry.PLACE_ID);
-                int placeNameIndex = cursor.getColumnIndex(EventEntry.PLACE_NAME);
-                int placePhotoRefIndex = cursor.getColumnIndex(EventEntry.PLACE_PHOTO_REF);
-                int placePriceRangeIndex = cursor.getColumnIndex(EventEntry.PLACE_PRICE_RANGE);
-                int placeAddressIndex = cursor.getColumnIndex(EventEntry.PLACE_ADDRESS);
+            event.setEventId((cursor.getInt(eventIdIndex)));
+            event.setEventName(cursor.getString(eventNameIndex));
+            event.setEventDate(cursor.getString(eventDateIndex));
+            event.setEventTime(cursor.getString(eventTimeIndex));
+            event.setEventDescription(cursor.getString(eventDescriptionIndex));
 
-                event.setEventId((cursor.getInt(eventIdIndex)));
-                event.setEventName(cursor.getString(eventNameIndex));
-                event.setEventDate(cursor.getString(eventDateIndex));
-                event.setEventTime(cursor.getString(eventTimeIndex));
-                event.setEventDescription(cursor.getString(eventDescriptionIndex));
+            Place place = new Place();
+            place.setId(cursor.getString(placeIdIndex));
+            place.setName(cursor.getString(placeNameIndex));
+            place.setPriceLevel(cursor.getInt(placePriceRangeIndex));
+            place.setVicinity(cursor.getString(placeAddressIndex));
 
-                Place place = new Place();
-                place.setId(cursor.getString(placeIdIndex));
-                place.setName(cursor.getString(placeNameIndex));
-                place.setPriceLevel(cursor.getInt(placePriceRangeIndex));
-                place.setVicinity(cursor.getString(placeAddressIndex));
+            List<Photo> photoList = new ArrayList<>();
+            Photo photo = new Photo();
+            photo.setPhotoReference(cursor.getString(placePhotoRefIndex));
+            photoList.add(photo);
+            place.setPhotos(photoList);
 
-                List<Photo> photoList = new ArrayList<>();
-                Photo photo = new Photo();
-                photo.setPhotoReference(cursor.getString(placePhotoRefIndex));
-                photoList.add(photo);
-                place.setPhotos(photoList);
-
-                event.setPlace(place);
-                eventList.add(event);
-            }
-            cursor.close();
+            event.setPlace(place);
+            eventList.add(event);
         }
         return eventList;
     }
@@ -151,4 +153,44 @@ public class LocalRepository {
         }
     }
 
+    public LocalRepository(Context mContext, ILocalRepositoryCallback listener) {
+        this.mContext = mContext;
+        this.listener = listener;
+    }
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, @Nullable Bundle args) {
+        switch (loaderId) {
+            case LOADER_EVENTS:
+                return new CursorLoader(mContext,
+                        EventEntry.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null);
+            default:
+                throw new RuntimeException("Loader Not Implemented: " + loaderId);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+
+        switch (loader.getId()) {
+            case LOADER_EVENTS:
+                listener.onEventListObtained(returnEvents(data));
+                break;
+
+        }
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+    }
+
+    public interface ILocalRepositoryCallback {
+        void onEventListObtained(List<Event> events);
+    }
 }

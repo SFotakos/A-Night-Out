@@ -1,11 +1,13 @@
 package sfotakos.anightout.events;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +23,7 @@ import sfotakos.anightout.databinding.FragmentEventBinding;
 import sfotakos.anightout.eventdetails.EventDetailsActivity;
 import sfotakos.anightout.newevent.NewEventActivity;
 
-public class EventsFragment extends Fragment {
+public class EventsFragment extends Fragment implements LocalRepository.ILocalRepositoryCallback {
 
     private FragmentEventBinding mBinding;
 
@@ -64,12 +66,16 @@ public class EventsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        setupEventRv();
+        Activity activity = getActivity();
+        if (activity instanceof AppCompatActivity) {
+            ((AppCompatActivity) activity).getSupportLoaderManager().initLoader(
+                    Constants.LOADER_EVENTS, null,
+                    new LocalRepository(getActivity(), this));
+        }
     }
 
-    private void setupEventRv() {
-        List<Event>  eventList = LocalRepository.queryEvents(getActivity().getContentResolver());
-        if (eventList != null && eventList.size() > 0) {
+    private void setupEventRv(List<Event> events) {
+        if (events != null && events.size() > 0) {
             mBinding.eventRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
                 @Override
                 public void eventClicked(Event event) {
@@ -78,7 +84,7 @@ public class EventsFragment extends Fragment {
                     eventDetailsIntent.setAction(Constants.HOME_ACTIVITY_PARENT);
                     startActivity(eventDetailsIntent);
                 }
-            }, eventList));
+            }, events));
             mBinding.eventRv.setLayoutManager(new LinearLayoutManager(getContext()));
 
             mBinding.eventNoEventTextView.setVisibility(View.GONE);
@@ -87,5 +93,10 @@ public class EventsFragment extends Fragment {
             mBinding.eventNoEventTextView.setVisibility(View.VISIBLE);
             mBinding.eventRv.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void onEventListObtained(List<Event> events) {
+        setupEventRv(events);
     }
 }
