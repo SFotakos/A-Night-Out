@@ -35,4 +35,7 @@
     <string name="home_eventsTab_title">Events</string>
     <string name="home_mapTab_title">Map</string>
 
+    <string name="accessibility_eventItem_eventName">Event name: %s</string>
+    <string name="accessibility_events_newEventFab">Create event</string>
+
 </resources>

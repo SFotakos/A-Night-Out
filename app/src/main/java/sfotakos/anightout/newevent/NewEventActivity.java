@@ -110,7 +110,7 @@ public class NewEventActivity extends AppCompatActivity {
 
     private void updateEventDateTimeFields() {
         mBinding.newEventDateEditText.setText(
-                DateFormat.getDateInstance(DateFormat.SHORT).format(myCalendar.getTime()));
+                DateFormat.getDateInstance(DateFormat.MEDIUM).format(myCalendar.getTime()));
         mBinding.newEventTimeEditText.setText(
                 DateFormat.getTimeInstance(DateFormat.SHORT).format(myCalendar.getTime()));
     }

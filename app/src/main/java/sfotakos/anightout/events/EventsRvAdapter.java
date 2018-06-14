@@ -1,5 +1,6 @@
 package sfotakos.anightout.events;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -8,11 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Calendar;
 import java.util.List;
 
 import sfotakos.anightout.R;
+import sfotakos.anightout.common.AccessibilityUtils;
 import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
+
+import static sfotakos.anightout.common.CalendarUtils.getCalendarFromDateTime;
 
 public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventViewHolder> {
 
@@ -35,7 +40,20 @@ public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventV
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
+        Context context = holder.mEventName.getContext();
         Event event = eventList.get(position);
+
+        boolean spokenAccessibility = AccessibilityUtils.isAccessibilityEnabled(
+                context, AccessibilityServiceInfo.FEEDBACK_SPOKEN);
+
+        if (spokenAccessibility) {
+            holder.mEventName.setContentDescription(
+                    context.getString(R.string.accessibility_eventItem_eventName, event.getEventName()));
+            Calendar cal = getCalendarFromDateTime(event.getEventDate(), event.getEventTime());
+            // TODO [QUESTION] This is working fine the first time, but not after that, why?
+            holder.mEventDate.setContentDescription(
+                    AccessibilityUtils.getAccessibilityDateFromCalendar(cal));
+        }
 
         holder.mEventName.setText(event.getEventName());
         holder.mEventDate.setText(event.getEventDate());
