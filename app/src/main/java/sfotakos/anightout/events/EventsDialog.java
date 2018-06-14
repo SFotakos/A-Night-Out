@@ -16,6 +16,7 @@ import android.view.Window;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
+import sfotakos.anightout.common.LocalRepository;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.DialogEventsBinding;
 
@@ -62,7 +63,7 @@ public class EventsDialog extends DialogFragment {
                         eventsDialogListener.eventClicked(event);
                     }
 
-                }, Event.queryEvents(getActivity().getContentResolver())));
+                }, LocalRepository.queryEvents(getActivity().getContentResolver())));
         dialogBinding.addEventEventsRv.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         return dialogBinding.getRoot();

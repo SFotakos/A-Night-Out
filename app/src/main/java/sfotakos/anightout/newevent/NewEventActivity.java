@@ -25,6 +25,7 @@ import java.util.Calendar;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
+import sfotakos.anightout.common.LocalRepository;
 import sfotakos.anightout.databinding.ActivityNewEventBinding;
 import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.place.PlaceDetailsActivity;
@@ -161,7 +162,7 @@ public class NewEventActivity extends AppCompatActivity {
                     newEvent.setEventDescription(
                             mBinding.newEventDescriptionInputEditText.getText().toString());
 
-                    Uri insertedUri = Event.insertEvent(getContentResolver(), newEvent);
+                    Uri insertedUri = LocalRepository.insertEvent(getContentResolver(), newEvent);
                     if (insertedUri != null) {
                         returnToCallerWithCreatedEventId(ContentUris.parseId(insertedUri));
                     } else {

@@ -17,6 +17,7 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
+import sfotakos.anightout.common.LocalRepository;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
@@ -100,7 +101,7 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
             if (resultCode == Activity.RESULT_OK) {
                 long eventId = data.getLongExtra(Constants.SAVED_EVENT_ID_EXTRA, -1);
                 if (eventId != -1) {
-                    Event.updateEventWithPlace(getContentResolver(), Long.toString(eventId), mPlace);
+                    LocalRepository.updateEventWithPlace(getContentResolver(), Long.toString(eventId), mPlace);
                     navigateToEvent();
                 }
             }
@@ -110,7 +111,7 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
 
     @Override
     public void eventClicked(Event event) {
-        Event.updateEventWithPlace(getContentResolver(), Long.toString(event.getEventId()), mPlace);
+        LocalRepository.updateEventWithPlace(getContentResolver(), Long.toString(event.getEventId()), mPlace);
         navigateToEvent();
     }
 

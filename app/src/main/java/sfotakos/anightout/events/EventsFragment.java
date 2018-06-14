@@ -16,6 +16,7 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
+import sfotakos.anightout.common.LocalRepository;
 import sfotakos.anightout.databinding.FragmentEventBinding;
 import sfotakos.anightout.eventdetails.EventDetailsActivity;
 import sfotakos.anightout.newevent.NewEventActivity;
@@ -67,7 +68,7 @@ public class EventsFragment extends Fragment {
     }
 
     private void setupEventRv() {
-        List<Event>  eventList = Event.queryEvents(getActivity().getContentResolver());
+        List<Event>  eventList = LocalRepository.queryEvents(getActivity().getContentResolver());
         if (eventList != null && eventList.size() > 0) {
             mBinding.eventRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
                 @Override

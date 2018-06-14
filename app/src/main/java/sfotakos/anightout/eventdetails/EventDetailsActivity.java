@@ -34,6 +34,7 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
+import sfotakos.anightout.common.LocalRepository;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityEventDetailsBinding;
@@ -139,7 +140,7 @@ public class EventDetailsActivity extends AppCompatActivity {
                     builder.setPositiveButton(getString(R.string.eventDetails_deleteDialog_confirmText),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    Event.deleteEvent(getContentResolver(),
+                                    LocalRepository.deleteEvent(getContentResolver(),
                                             Integer.toString(mEvent.getEventId()));
                                     onNavigateUp();
                                 }
