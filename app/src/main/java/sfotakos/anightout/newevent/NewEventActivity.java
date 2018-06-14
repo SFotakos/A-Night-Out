@@ -2,20 +2,22 @@ package sfotakos.anightout.newevent;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -35,7 +37,12 @@ public class NewEventActivity extends AppCompatActivity {
 
     private ActivityNewEventBinding mBinding;
 
-    private final Calendar myCalendar = Calendar.getInstance();
+    private Calendar eventCalendar = Calendar.getInstance();
+    private Calendar timePickerCalendar = Calendar.getInstance();
+    private Calendar datePickerCalendar = Calendar.getInstance();
+
+    private AlertDialog timePickerDialog;
+    private DatePickerDialog datePickerDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +58,6 @@ public class NewEventActivity extends AppCompatActivity {
         setupActivity();
     }
 
-    private void setupActivity() {
-        updateEventDateTimeFields();
-        setupEventDateField();
-        setupEventTimeField();
-        setupSaveButton();
-    }
-
     @Nullable
     @Override
     public Intent getSupportParentActivityIntent() {
@@ -70,20 +70,65 @@ public class NewEventActivity extends AppCompatActivity {
         return this.getNavigationUpIntent();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putSerializable(Constants.STATE_CALENDAR, eventCalendar);
+        outState.putSerializable(Constants.STATE_TIME_PICKER_CALENDAR, timePickerCalendar);
+
+        if (datePickerDialog != null && datePickerDialog.isShowing()) {
+            DatePicker datePicker = datePickerDialog.getDatePicker();
+            datePickerCalendar.set(Calendar.YEAR, datePicker.getYear());
+            datePickerCalendar.set(Calendar.MONTH, datePicker.getMonth());
+            datePickerCalendar.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
+            outState.putSerializable(Constants.STATE_DATE_PICKER_CALENDAR, datePickerCalendar);
+        }
+
+        outState.putBoolean(Constants.STATE_DATE_PICKER_DIALOG,
+                datePickerDialog != null && datePickerDialog.isShowing());
+        outState.putBoolean(Constants.STATE_TIME_PICKER_DIALOG,
+                timePickerDialog != null && timePickerDialog.isShowing());
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            eventCalendar = getCalendarFromSerializable(
+                    savedInstanceState.getSerializable(Constants.STATE_CALENDAR));
+            timePickerCalendar = getCalendarFromSerializable(
+                    savedInstanceState.getSerializable(Constants.STATE_TIME_PICKER_CALENDAR));
+            datePickerCalendar = getCalendarFromSerializable(
+                    savedInstanceState.getSerializable(Constants.STATE_DATE_PICKER_CALENDAR));
+
+            if (savedInstanceState.getBoolean(Constants.STATE_DATE_PICKER_DIALOG, false)) {
+                showDatePicker();
+            } else if (savedInstanceState.getBoolean(Constants.STATE_TIME_PICKER_DIALOG, false)) {
+                showTimePicker();
+            }
+        }
+    }
+
+    private Calendar getCalendarFromSerializable(Serializable serializable) {
+        return (serializable != null && serializable instanceof Calendar) ?
+                (Calendar) serializable : Calendar.getInstance();
+    }
+
+    private void setupActivity() {
+        updateEventDateTimeFields();
+        setupEventDateField();
+        setupEventTimeField();
+        setupSaveButton();
+    }
+
     private void setupEventTimeField() {
         mBinding.newEventTimeEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new TimePickerDialog(NewEventActivity.this,
-                        new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                                myCalendar.set(Calendar.HOUR_OF_DAY, hour);
-                                myCalendar.set(Calendar.MINUTE, minute);
-                                updateEventDateTimeFields();
-                            }
-                        }, myCalendar.get(Calendar.HOUR_OF_DAY), myCalendar.get(Calendar.MINUTE),
-                        true).show();
+                showTimePicker();
             }
         });
     }
@@ -92,27 +137,16 @@ public class NewEventActivity extends AppCompatActivity {
         mBinding.newEventDateEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new DatePickerDialog(NewEventActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                                myCalendar.set(Calendar.YEAR, year);
-                                myCalendar.set(Calendar.MONTH, month);
-                                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                                updateEventDateTimeFields();
-                            }
-                        }, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                showDatePicker();
             }
         });
     }
 
     private void updateEventDateTimeFields() {
         mBinding.newEventDateEditText.setText(
-                DateFormat.getDateInstance(DateFormat.MEDIUM).format(myCalendar.getTime()));
+                DateFormat.getDateInstance(DateFormat.MEDIUM).format(eventCalendar.getTime()));
         mBinding.newEventTimeEditText.setText(
-                DateFormat.getTimeInstance(DateFormat.SHORT).format(myCalendar.getTime()));
+                DateFormat.getTimeInstance(DateFormat.SHORT).format(eventCalendar.getTime()));
     }
 
     private void setupSaveButton() {
@@ -139,6 +173,74 @@ public class NewEventActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    // Sadly TimePickerDialog shows a blank screen on landscape in some devices so this is a workaround
+    private void showTimePicker() {
+        final TimePicker timePicker = new TimePicker(this);
+        timePicker.setCurrentHour(timePickerCalendar.get(Calendar.HOUR_OF_DAY));
+        timePicker.setCurrentMinute(timePickerCalendar.get(Calendar.MINUTE));
+        timePicker.setIs24HourView(true);
+        timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+            @Override
+            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                timePickerCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                timePickerCalendar.set(Calendar.MINUTE, minute);
+            }
+        });
+
+        timePickerDialog = new AlertDialog.Builder(this)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        eventCalendar.set(Calendar.HOUR_OF_DAY, timePickerCalendar.get(Calendar.HOUR_OF_DAY));
+                        eventCalendar.set(Calendar.MINUTE, timePickerCalendar.get(Calendar.MINUTE));
+                        updateEventDateTimeFields();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        resetCalendarToEventCalendar(timePickerCalendar);
+                        dialog.dismiss();
+                    }
+                })
+                .setView(timePicker).show();
+    }
+
+    private void showDatePicker() {
+        datePickerDialog = new DatePickerDialog(NewEventActivity.this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        eventCalendar.set(Calendar.YEAR, year);
+                        eventCalendar.set(Calendar.MONTH, month);
+                        eventCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        updateEventDateTimeFields();
+                    }
+                }, datePickerCalendar.get(Calendar.YEAR), datePickerCalendar.get(Calendar.MONTH),
+                datePickerCalendar.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                resetCalendarToEventCalendar(datePickerCalendar);
+            }
+        });
+        datePickerDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                resetCalendarToEventCalendar(datePickerCalendar);
+            }
+        });
+        datePickerDialog.show();
+    }
+
+    private void resetCalendarToEventCalendar(Calendar calendar) {
+        calendar.set(Calendar.YEAR, eventCalendar.get(Calendar.YEAR));
+        calendar.set(Calendar.MONTH, eventCalendar.get(Calendar.MONTH));
+        calendar.set(Calendar.DAY_OF_MONTH, eventCalendar.get(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.HOUR_OF_DAY, eventCalendar.get(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, eventCalendar.get(Calendar.MINUTE));
     }
 
     private boolean isUserInputValid() {

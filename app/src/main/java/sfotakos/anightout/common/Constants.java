@@ -6,6 +6,11 @@ public class Constants {
     public final static String SAVED_EVENT_ID_EXTRA = "savedEventId";
 
     public final static String STATE_MAP = "state_map";
+    public final static String STATE_CALENDAR = "state_calendar";
+    public final static String STATE_TIME_PICKER_CALENDAR = "state_timePicker_calendar";
+    public final static String STATE_DATE_PICKER_CALENDAR = "state_datePicker_calendar";
+    public final static String STATE_DATE_PICKER_DIALOG = "state_datePicker_dialog";
+    public final static String STATE_TIME_PICKER_DIALOG = "state_timePicker_dialog";
 
     public final static int WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 28145;
     public final static int LOCATION_PERMISSION_REQUEST_CODE = 12045;
