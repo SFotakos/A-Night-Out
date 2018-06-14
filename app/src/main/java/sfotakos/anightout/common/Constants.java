@@ -21,6 +21,8 @@ public class Constants {
     public static final String MAP_TUTORIAL = "mapTutorial";
     public static final String MAP_FILTER_TUTORIAL_PRICE = "mapFilterTutorial_price";
 
+    public static final String GOOGLE_PLACE_API_BASE_URL = "https://maps.googleapis.com/maps/api/place/";
+
     public enum HomeTabs {
         EVENT_TAB(0),
         MAP_TAB(1);

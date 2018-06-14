@@ -131,10 +131,9 @@ public class NewEventActivity extends AppCompatActivity {
                     if (insertedUri != null) {
                         returnToCallerWithCreatedEventId(ContentUris.parseId(insertedUri));
                     } else {
-                        // TODO treat this better or at least put the string into strings.xml
                         Toast.makeText(
                                 v.getContext(),
-                                "There was a problem saving the event, please try again",
+                                R.string.newEvent_saving_error,
                                 Toast.LENGTH_LONG).show();
                     }
                 }

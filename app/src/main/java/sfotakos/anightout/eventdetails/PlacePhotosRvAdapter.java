@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import sfotakos.anightout.R;
-import sfotakos.anightout.common.NetworkUtil;
+import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 
 public class PlacePhotosRvAdapter extends RecyclerView.Adapter<PlacePhotosRvAdapter.PhotosViewHolder> {
@@ -47,7 +47,7 @@ public class PlacePhotosRvAdapter extends RecyclerView.Adapter<PlacePhotosRvAdap
                 place.getPhotos().size() > 0 &&
                 place.getPhotos().get(0).getPhotoReference() != null) {
             // TODO move this to a request class which returns the fully qualified uri
-            photoUri = Uri.parse(NetworkUtil.GOOGLE_PLACE_API_BASE_URL).buildUpon()
+            photoUri = Uri.parse(Constants.GOOGLE_PLACE_API_BASE_URL).buildUpon()
                     .appendPath("photo")
                     .appendQueryParameter("key", context.getString(R.string.google_places_key))
                     .appendQueryParameter("maxheight", "400")

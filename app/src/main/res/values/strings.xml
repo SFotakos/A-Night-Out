@@ -37,5 +37,6 @@
 
     <string name="accessibility_eventItem_eventName">Event name: %s</string>
     <string name="accessibility_events_newEventFab">Create event</string>
+    <string name="newEvent_saving_error">There was a problem saving the event, please try again</string>
 
 </resources>
