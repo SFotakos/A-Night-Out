@@ -59,7 +59,7 @@ import static android.app.Activity.RESULT_OK;
 public class MapFragment extends Fragment implements OnMapReadyCallback,
         MapHelper.IMapHelper, PlaceClusterManager.IPlaceClusterManager {
 
-     // This is a workaround so SeekBar has a min value
+    // This is a workaround so SeekBar has a min value
 
     private FragmentMapBinding mBinding;
     private Context mContext;
@@ -155,10 +155,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             if (resultCode == RESULT_OK) {
                 mMapHelper.requestLocationUpdates(mFusedLocationClient);
             }
-        } else if (requestCode == Constants.PLACE_ADDED_TO_EVENT_RESULT_CODE){
-            if (resultCode == RESULT_OK){
+        } else if (requestCode == Constants.PLACE_ADDED_TO_EVENT_RESULT_CODE) {
+            if (resultCode == RESULT_OK) {
                 // TODO this is absurdly coupled, change this..
-                ((HomeActivity ) getActivity()).navigateToTab(Constants.HomeTabs.EVENT_TAB);
+                ((HomeActivity) getActivity()).navigateToTab(Constants.HomeTabs.EVENT_TAB);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -323,7 +323,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         final List<String> placeDescriptionList = new ArrayList<>();
         for (GooglePlacesRequest.PlaceType placeType : GooglePlacesRequest.PlaceType.values()) {
             iconResList.add(placeType.getIconResId());
-            placeDescriptionList.add(placeType.getDescription());
+            placeDescriptionList.add(getString(placeType.getDescription()));
         }
         IconAndTextAdapter placeIconAndTextAdapter = new IconAndTextAdapter(mContext,
                 R.layout.spinner_icon_and_text, placeDescriptionList, iconResList);

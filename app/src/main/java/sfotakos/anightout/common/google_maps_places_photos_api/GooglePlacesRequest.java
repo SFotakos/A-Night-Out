@@ -27,29 +27,24 @@ public class GooglePlacesRequest {
         placesCall.enqueue(callback);
     }
 
-    // TODO make description strings.xml resources
     public enum PlaceType {
 
-        RESTAURANT(R.drawable.ic_store, "Restaurant", "restaurant"),
-        BAR(R.drawable.ic_bar, "Bar", "bar"),
-        CAFE(R.drawable.ic_cafe, "Cafe", "cafe");
+        RESTAURANT(R.drawable.ic_store, R.string.googlePlace_placeType_restaurant, "restaurant"),
+        BAR(R.drawable.ic_bar, R.string.googlePlace_placeType_bar, "bar"),
+        CAFE(R.drawable.ic_cafe, R.string.googlePlace_placeType_cafe, "cafe");
 
-        private String description;
+        private int descriptionRes;
         private String tag;
         private int iconResId;
 
-        PlaceType(int iconResId, String description, String tag) {
+        PlaceType(int iconResId, int descriptionRes, String tag) {
             this.iconResId = iconResId;
-            this.description = description;
+            this.descriptionRes = descriptionRes;
             this.tag = tag;
         }
 
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
+        public int getDescription() {
+            return descriptionRes;
         }
 
         public String getTag() {

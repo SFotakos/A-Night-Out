@@ -44,5 +44,8 @@
     <string name="googlePlace_price_moderate">Moderate</string>
     <string name="googlePlace_price_expensive">Expensive</string>
     <string name="googlePlace_price_veryExpensive">Very Expensive</string>
+    <string name="googlePlace_placeType_restaurant">Restaurant</string>
+    <string name="googlePlace_placeType_bar">Bar</string>
+    <string name="googlePlace_placeType_cafe">Cafe</string>
 
 </resources>
