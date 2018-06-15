@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 
@@ -21,6 +23,7 @@ public class EventWidgetConfiguration extends AppCompatActivity implements Local
 
     private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     private RecyclerView eventsRv;
+    private TextView noEventsTv;
 
     public EventWidgetConfiguration() {
         super();
@@ -35,6 +38,7 @@ public class EventWidgetConfiguration extends AppCompatActivity implements Local
         setResult(RESULT_CANCELED);
 
         eventsRv = findViewById(R.id.widget_events_rv);
+        noEventsTv = findViewById(R.id.widget_noEvents_tv);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         eventsRv.setLayoutManager(layoutManager);
@@ -60,25 +64,32 @@ public class EventWidgetConfiguration extends AppCompatActivity implements Local
 
     @Override
     public void onEventListObtained(List<Event> events) {
-        eventsRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
-            @Override
-            public void eventClicked(Event event) {
-                EventWidgetPreferenceUtil.persistEvent(
-                        EventWidgetConfiguration.this, pojoToJson(event), mAppWidgetId);
+        if (events == null || events.size() == 0) {
+            eventsRv.setVisibility(View.GONE);
+            noEventsTv.setVisibility(View.VISIBLE);
+        } else {
+            eventsRv.setAdapter(new EventsRvAdapter(new EventsRvAdapter.IEventsListener() {
+                @Override
+                public void eventClicked(Event event) {
+                    EventWidgetPreferenceUtil.persistEvent(
+                            EventWidgetConfiguration.this, pojoToJson(event), mAppWidgetId);
 
-                // It is the responsibility of the configuration activity to update the app widget
-                AppWidgetManager appWidgetManager =
-                        AppWidgetManager.getInstance(EventWidgetConfiguration.this);
-                EventWidgetProvider.updateAppWidget(
-                        EventWidgetConfiguration.this, appWidgetManager, mAppWidgetId);
+                    // It is the responsibility of the configuration activity to update the app widget
+                    AppWidgetManager appWidgetManager =
+                            AppWidgetManager.getInstance(EventWidgetConfiguration.this);
+                    EventWidgetProvider.updateAppWidget(
+                            EventWidgetConfiguration.this, appWidgetManager, mAppWidgetId);
 
-                // Make sure we pass back the original appWidgetId
-                Intent resultValue = new Intent();
-                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-                setResult(RESULT_OK, resultValue);
-                finish();
-            }
-        }, events));
+                    // Make sure we pass back the original appWidgetId
+                    Intent resultValue = new Intent();
+                    resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+                    setResult(RESULT_OK, resultValue);
+                    finish();
+                }
+            }, events));
+            eventsRv.setVisibility(View.VISIBLE);
+            noEventsTv.setVisibility(View.GONE);
+        }
     }
 
     private String pojoToJson(Object pojo) {

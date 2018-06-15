@@ -36,6 +36,7 @@ public class EventWidgetProvider extends AppWidgetProvider {
             // Pending intent that opens activity with the proper event
             Intent eventDetailsIntent = new Intent(context, EventDetailsActivity.class);
             eventDetailsIntent.putExtra(Constants.EVENT_EXTRA, event);
+            eventDetailsIntent.setAction(Constants.HOME_ACTIVITY_PARENT);
             PendingIntent eventDetailsPendingIntent =
                     PendingIntent.getActivity(context, appWidgetId, eventDetailsIntent, 0);
             views.setOnClickPendingIntent(R.id.widgetRoot_rl, eventDetailsPendingIntent);
