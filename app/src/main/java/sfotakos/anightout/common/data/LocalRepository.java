@@ -1,4 +1,4 @@
-package sfotakos.anightout.common;
+package sfotakos.anightout.common.data;
 
 
 import android.content.ContentResolver;
@@ -16,6 +16,7 @@ import android.support.v4.content.Loader;
 import java.util.ArrayList;
 import java.util.List;
 
+import sfotakos.anightout.common.Event;
 import sfotakos.anightout.common.data.NightOutContract.EventEntry;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Photo;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;

@@ -25,7 +25,7 @@ import java.util.Calendar;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
-import sfotakos.anightout.common.LocalRepository;
+import sfotakos.anightout.common.data.LocalRepository;
 import sfotakos.anightout.databinding.ActivityNewEventBinding;
 import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.place.PlaceDetailsActivity;
