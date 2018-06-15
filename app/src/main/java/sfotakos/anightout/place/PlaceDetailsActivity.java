@@ -1,7 +1,10 @@
 package sfotakos.anightout.place;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -17,7 +20,7 @@ import java.util.List;
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.Event;
-import sfotakos.anightout.common.data.LocalRepository;
+import sfotakos.anightout.common.data.UpdatePlaceService;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.ActivityPlaceDetailsBinding;
@@ -31,6 +34,7 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
     private ActivityPlaceDetailsBinding mBinding;
     private EventsDialog mEventsDialog;
     private Place mPlace;
+    private UpdatedEventReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +79,7 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
                         new LinearLayoutManager(this,
                                 LinearLayoutManager.HORIZONTAL, false));
             }
+            mReceiver = new UpdatedEventReceiver();
         }
     }
 
@@ -101,8 +106,7 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
             if (resultCode == Activity.RESULT_OK) {
                 long eventId = data.getLongExtra(Constants.SAVED_EVENT_ID_EXTRA, -1);
                 if (eventId != -1) {
-                    LocalRepository.updateEventWithPlace(getContentResolver(), Long.toString(eventId), mPlace);
-                    navigateToEvent();
+                    updateEventWithPlace(Long.toString(eventId));
                 }
             }
         }
@@ -110,9 +114,27 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mReceiver, new IntentFilter(Constants.PLACE_SERVICE_BROADCAST_ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mReceiver);
+    }
+
+    @Override
     public void eventClicked(Event event) {
-        LocalRepository.updateEventWithPlace(getContentResolver(), Long.toString(event.getEventId()), mPlace);
-        navigateToEvent();
+        updateEventWithPlace(Integer.toString(event.getEventId()));
+    }
+
+    private void updateEventWithPlace(String eventId){
+        Intent i = new Intent(this, UpdatePlaceService.class);
+        i.putExtra(Constants.SAVED_EVENT_ID_EXTRA, eventId);
+        i.putExtra(Constants.PLACE_EXTRA, mPlace);
+        startService(i);
     }
 
     @Override
@@ -126,5 +148,12 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
         Intent returnIntent = new Intent();
         setResult(Activity.RESULT_OK, returnIntent);
         finish();
+    }
+
+    class UpdatedEventReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            navigateToEvent();
+        }
     }
 }

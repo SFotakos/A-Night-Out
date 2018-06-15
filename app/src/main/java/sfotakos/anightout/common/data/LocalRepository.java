@@ -99,8 +99,9 @@ public class LocalRepository implements LoaderManager.LoaderCallbacks<Cursor> {
         contentResolver.delete(getEventByIdUri(eventId), null, null);
     }
 
-    public static void updateEventWithPlace(@NonNull ContentResolver contentResolver,
+    public static boolean updateEventWithPlace(@NonNull ContentResolver contentResolver,
                                             @NonNull String eventId, @NonNull Place place) {
+        boolean hasUpdated = false;
         Cursor eventByIdCursor =
                 queryEventById(contentResolver, eventId);
 
@@ -147,11 +148,12 @@ public class LocalRepository implements LoaderManager.LoaderCallbacks<Cursor> {
                         place.getPhotos().get(0).getPhotoReference());
             }
 
-            contentResolver.update(getEventByIdUri(eventId), contentValues,
-                    null, null);
+            hasUpdated = contentResolver.update(getEventByIdUri(eventId), contentValues,
+                    null, null) != 0;
 
             eventByIdCursor.close();
         }
+        return hasUpdated;
     }
 
     public LocalRepository(Context mContext, ILocalRepositoryCallback listener) {
