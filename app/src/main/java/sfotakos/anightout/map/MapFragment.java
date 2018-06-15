@@ -59,8 +59,6 @@ import static android.app.Activity.RESULT_OK;
 public class MapFragment extends Fragment implements OnMapReadyCallback,
         MapHelper.IMapHelper, PlaceClusterManager.IPlaceClusterManager {
 
-    // This is a workaround so SeekBar has a min value
-
     private FragmentMapBinding mBinding;
     private Context mContext;
     private Activity mActivity;
@@ -68,9 +66,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private MapHelper mMapHelper;
 
     private FusedLocationProviderClient mFusedLocationClient;
-
-    public MapFragment() { // Required empty public constructor
-    }
 
     public static MapFragment newInstance() {
         return new MapFragment();

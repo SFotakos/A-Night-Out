@@ -27,17 +27,8 @@ public class EventsFragment extends Fragment implements LocalRepository.ILocalRe
 
     private FragmentEventBinding mBinding;
 
-    public EventsFragment() {
-        // Required empty public constructor
-    }
-
     public static EventsFragment newInstance() {
         return new EventsFragment();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
