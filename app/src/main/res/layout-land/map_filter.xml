@@ -2,7 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
@@ -12,7 +12,7 @@
         android:paddingTop="@dimen/padding_half">
 
         <!-- TODO Group common view using meta group from constrain layout -->
-        <android.support.v7.widget.AppCompatImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/filter_priceRange_imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,14 +21,14 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_price" />
 
-        <android.support.v7.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:id="@+id/filter_priceRange_spinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toStartOf="@+id/filter_priceRange_checkBox"
             app:layout_constraintStart_toEndOf="@+id/filter_priceRange_imageView" />
 
-        <android.support.v7.widget.AppCompatCheckBox
+        <androidx.appcompat.widget.AppCompatCheckBox
             android:id="@+id/filter_priceRange_checkBox"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
@@ -38,7 +38,7 @@
             app:layout_constraintEnd_toStartOf="@+id/spinnerSeparator"
             app:layout_constraintTop_toTopOf="@+id/filter_priceRange_spinner" />
 
-        <android.support.v7.widget.AppCompatImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/filter_distance_imageView"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
@@ -71,7 +71,7 @@
             app:layout_constraintEnd_toStartOf="@+id/vertical_center_guideline"
             app:layout_constraintTop_toTopOf="@+id/filter_distance_imageView" />
 
-        <android.support.v7.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:id="@+id/filter_place_spinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -99,7 +99,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/filter_cancel_button" />
 
-        <android.support.constraint.Guideline
+        <androidx.constraintlayout.widget.Guideline
             android:id="@+id/vertical_center_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -117,5 +117,5 @@
             app:layout_constraintTop_toTopOf="@+id/filter_priceRange_checkBox" />
 
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".newevent.NewEventActivity">
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/newEvent_toolbar"
             style="@style/ThemeOverlay.AppCompat.Light"
             android:layout_width="match_parent"
@@ -19,7 +19,7 @@
             app:theme="@style/ThemeOverlay.AppCompat.Dark"
             app:title="@string/newEvent_toolbarTitle" />
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/newEvent_name_inputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,14 +32,14 @@
             app:layout_constraintTop_toBottomOf="@+id/newEvent_toolbar">
 
             <!--TODO [QUESTION] With this flagged as importantForAccessibility the input text gets read twice, with this flagged as no means the user can't hear what he typed, how to fix this? -->
-            <android.support.design.widget.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/newEvent_name_inputEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:importantForAccessibility="no"
                 android:maxLength="20" />
 
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <EditText
             android:id="@+id/newEvent_date_editText"
@@ -63,7 +63,7 @@
             app:layout_constraintStart_toEndOf="@+id/newEvent_date_editText"
             app:layout_constraintTop_toBottomOf="@+id/newEvent_name_inputLayout" />
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/newEvent_description_inputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,13 +75,13 @@
             app:layout_constraintTop_toBottomOf="@+id/newEvent_date_editText">
 
             <!--TODO [QUESTION] With this flagged as importantForAccessibility the input text gets read twice, with this flagged as no means the user can't hear what he typed, how to fix this? -->
-            <android.support.design.widget.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/newEvent_description_inputEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:importantForAccessibility="no" />
 
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/newEvent_save_button"
@@ -95,5 +95,5 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

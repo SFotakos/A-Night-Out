@@ -2,7 +2,7 @@ package sfotakos.anightout.common.data;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import sfotakos.anightout.common.Constants;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
