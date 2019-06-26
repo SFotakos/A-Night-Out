@@ -6,45 +6,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
-        android:paddingBottom="@dimen/padding_half"
+        android:paddingBottom="@dimen/padding_default"
         android:paddingEnd="@dimen/padding_default"
         android:paddingStart="@dimen/padding_default"
-        android:paddingTop="@dimen/padding_half">
+        android:paddingTop="@dimen/padding_default">
 
         <!-- TODO Group common view using meta group from constrain layout -->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/filter_priceRange_imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:tint="@android:color/white"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_price" />
-
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:id="@+id/filter_priceRange_spinner"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/filter_places_rv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toStartOf="@+id/filter_priceRange_checkBox"
-            app:layout_constraintStart_toEndOf="@+id/filter_priceRange_imageView"
-            app:layout_constraintTop_toTopOf="@+id/filter_priceRange_imageView" />
-
-        <androidx.appcompat.widget.AppCompatCheckBox
-            android:id="@+id/filter_priceRange_checkBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:checked="true"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/filter_priceRange_spinner" />
-
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:id="@+id/filter_place_spinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_half"
-            app:layout_constraintEnd_toEndOf="@+id/filter_priceRange_spinner"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/filter_priceRange_imageView" />
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/filter_distance_imageView"
@@ -53,7 +27,7 @@
             android:layout_marginTop="@dimen/margin_half"
             android:tint="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/filter_place_spinner"
+            app:layout_constraintTop_toBottomOf="@+id/filter_places_rv"
             app:srcCompat="@drawable/ic_distance" />
 
         <SeekBar
@@ -75,7 +49,7 @@
             android:textColor="@android:color/white"
             android:textSize="@dimen/text_subheading"
             app:layout_constraintBottom_toBottomOf="@+id/filter_distance_imageView"
-            app:layout_constraintEnd_toEndOf="@+id/filter_priceRange_checkBox"
+            app:layout_constraintEnd_toEndOf="@+id/filter_search_button"
             app:layout_constraintTop_toTopOf="@+id/filter_distance_imageView" />
 
         <Button

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import androidx.databinding.DataBindingUtil;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
@@ -16,11 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
 import com.google.android.gms.common.api.ApiException;
@@ -51,6 +50,7 @@ import sfotakos.anightout.common.TutorialUtil;
 import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.FragmentMapBinding;
+import sfotakos.anightout.filter.FilterAdapter;
 import sfotakos.anightout.home.HomeActivity;
 import sfotakos.anightout.place.PlaceDetailsActivity;
 
@@ -118,9 +118,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
             Parcelable parcelable = savedInstanceState.getParcelable(Constants.STATE_MAP);
-            if (parcelable != null && parcelable instanceof MapState) {
+            if (parcelable instanceof MapState) {
                 mMapHelper.restoreMapState((MapState) parcelable);
-                togglePriceFilteringViewState(mMapHelper.getMapState().isPriceSearchingEnabled());
                 if (mMapHelper.getMapState().isFilterEnabled()) {
                     showFilter();
                 }
@@ -183,7 +182,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public void onCameraAnimationFinished() {
         mMapHelper.setSearchCircle(Integer.valueOf(mMapHelper.getMapState().getSearchRadius()));
         showFilter();
-        showPriceFilterTutorial();
     }
 
     @Override
@@ -227,7 +225,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     //region Fragment interaction setup
     private void setupFragment() {
         setupPlaceFilter();
-        setupPriceFilter();
         setupRangeFilter();
         setupFilterActions();
 
@@ -235,55 +232,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             @Override
             public void onClick(View v) {
                 getUserLastKnownLocationWithChecks();
-            }
-        });
-    }
-
-    private void togglePriceFilteringViewState(final boolean enabled) {
-        mBinding.mapFilter.filterPriceRangeSpinner.post(new Runnable() {
-            @Override
-            public void run() {
-                View selectedView = mBinding.mapFilter.filterPriceRangeSpinner.getSelectedView();
-                if (selectedView != null) {
-                    selectedView.setEnabled(enabled);
-                }
-            }
-        });
-        mBinding.mapFilter.filterPriceRangeSpinner.setEnabled(enabled);
-
-        mBinding.mapFilter.filterPriceRangeImageView.setColorFilter(enabled ?
-                        getResources().getColor(android.R.color.white) :
-                        getResources().getColor(android.R.color.darker_gray),
-                PorterDuff.Mode.SRC_ATOP);
-    }
-
-    private void setupPriceFilter() {
-        togglePriceFilteringViewState(mMapHelper.getMapState().isPriceSearchingEnabled());
-        final List<String> priceDescriptionList = new ArrayList<>();
-        for (GooglePlacesRequest.PlacePrice placePrice : GooglePlacesRequest.PlacePrice.values()) {
-            priceDescriptionList.add(getString(placePrice.getDescription()));
-        }
-        IconAndTextAdapter priceIconAndTextAdapter = new IconAndTextAdapter(mContext,
-                R.layout.spinner_icon_and_text, priceDescriptionList);
-        mBinding.mapFilter.filterPriceRangeSpinner.setAdapter(priceIconAndTextAdapter);
-        mBinding.mapFilter.filterPriceRangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
-                mMapHelper.getMapState().setPrice(GooglePlacesRequest.PlacePrice.values()[position].getTag());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView adapterView) {
-
-            }
-        });
-
-        mBinding.mapFilter.filterPriceRangeCheckBox.setChecked(mMapHelper.getMapState().isPriceSearchingEnabled());
-        mBinding.mapFilter.filterPriceRangeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mMapHelper.getMapState().setPriceSearchingEnabled(isChecked);
-                togglePriceFilteringViewState(isChecked);
             }
         });
     }
@@ -314,26 +262,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     private void setupPlaceFilter() {
-        List<Integer> iconResList = new ArrayList<>();
-        final List<String> placeDescriptionList = new ArrayList<>();
-        for (GooglePlacesRequest.PlaceType placeType : GooglePlacesRequest.PlaceType.values()) {
-            iconResList.add(placeType.getIconResId());
-            placeDescriptionList.add(getString(placeType.getDescription()));
-        }
-        IconAndTextAdapter placeIconAndTextAdapter = new IconAndTextAdapter(mContext,
-                R.layout.spinner_icon_and_text, placeDescriptionList, iconResList);
-        mBinding.mapFilter.filterPlaceSpinner.setAdapter(placeIconAndTextAdapter);
-        mBinding.mapFilter.filterPlaceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView adapterView, View view, int position, long rowId) {
-                mMapHelper.getMapState().setType(GooglePlacesRequest.PlaceType.values()[position].getTag());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView adapterView) {
-
-            }
-        });
+        mBinding.mapFilter.filterPlacesRv.setAdapter(new FilterAdapter());
+        mBinding.mapFilter.filterPlacesRv.setLayoutManager(
+                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.HORIZONTAL));
     }
 
     private void setupFilterActions() {
@@ -366,14 +297,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 mBinding.getRoot().findViewById(R.id.map),
                 getString(R.string.mapFragment_marker_tutorial),
                 Constants.MAP_TUTORIAL, false);
-    }
-
-    private void showPriceFilterTutorial() {
-        TutorialUtil.showDefaultTutorial(
-                mActivity,
-                mBinding.mapFilter.filterPriceRangeCheckBox,
-                getString(R.string.mapFilter_priceRange_tutorial),
-                Constants.MAP_FILTER_TUTORIAL_PRICE, false);
     }
     //endregion
 

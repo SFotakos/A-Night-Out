@@ -16,14 +16,13 @@ import sfotakos.anightout.common.NetworkUtil;
 public class GooglePlacesRequest {
     public static void requestPlacesFromAPI(@NonNull Resources resources, @NonNull LatLng latLng,
                                             @NonNull String searchRadius, @NonNull String placeType,
-                                            @Nullable String priceRange,
                                             @NonNull Callback<GooglePlacesPlaceResponse> callback) {
         Call<GooglePlacesPlaceResponse> placesCall = NetworkUtil.googlePlaceAPI.getPlaces(
                 resources.getString(R.string.google_places_key),
                 latLng.latitude + "," + latLng.longitude,
                 searchRadius,
                 placeType,
-                priceRange);
+                null);
         placesCall.enqueue(callback);
     }
 

@@ -187,7 +187,6 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
         GooglePlacesRequest.requestPlacesFromAPI(resources, mapState.getClickedLatLng(),
                 mapState.getSearchRadius(),
                 mapState.getType(),
-                mapState.isPriceSearchingEnabled() ? mapState.getPrice() : null,
                 this);
     }
 
