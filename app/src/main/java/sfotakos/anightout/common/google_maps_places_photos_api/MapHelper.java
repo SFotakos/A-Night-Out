@@ -155,9 +155,12 @@ public class MapHelper implements GoogleMap.CancelableCallback, Callback<GoogleP
                 public void onLocationResult(LocationResult result) {
                     Location location = result.getLastLocation();
                     if (location != null) {
-                        moveMapToUserLocation(
-                                new LatLng(location.getLatitude(), location.getLongitude()),
-                                false);
+                        cleanMap();
+
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        mapState.setCenterMarkerLatLng(latLng);
+                        moveMapToUserLocation(latLng, true);
+
                         mapState.setHasZoomedIn(true);
                         isRequestLocationUpdatesActive = false;
                         fusedLocationClient.removeLocationUpdates(mLocationCallback);

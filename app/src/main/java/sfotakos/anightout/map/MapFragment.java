@@ -195,15 +195,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mBinding.mapFilter.getRoot().setVisibility(View.VISIBLE);
     }
 
-    private void resetFilterOptions() {
-        mBinding.mapFilter.filterDistanceSeekBar.setProgress(0);
-        mMapHelper.getMapState().setSearchRadius(Integer.toString(MapState.MIN_SEARCH_RADIUS));
-        mMapHelper.getMapState().setCenterMarkerLatLng(null);
-    }
-
     private void canUseFilterActions(boolean enabled) {
         mBinding.mapFilter.filterSearchButton.setEnabled(enabled);
-        mBinding.mapFilter.filterCancelButton.setEnabled(enabled);
     }
 
     private void requestPlaces() {
@@ -275,17 +268,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         requestPlaces();
                     }
                 });
-
-        mBinding.mapFilter.filterCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetFilterOptions();
-                if (mMapHelper.isMapReady())
-                    mMapHelper.cleanMap();
-                mBinding.mapFilter.getRoot().setVisibility(View.GONE);
-                mMapHelper.getMapState().setFilterEnabled(false);
-            }
-        });
     }
     //endregion
 
