@@ -151,8 +151,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             }
         } else if (requestCode == Constants.PLACE_ADDED_TO_EVENT_RESULT_CODE) {
             if (resultCode == RESULT_OK) {
+                if (data.getExtras() != null) {
+                    Integer eventId = data.getExtras().getInt(Constants.EVENT_ID_EXTRA);
+                    ((HomeActivity) getActivity()).navigateToEvent(eventId);
+                }
                 // TODO this is absurdly coupled, change this..
-                ((HomeActivity) getActivity()).navigateToTab(Constants.HomeTabs.EVENT_TAB);
+//                ((HomeActivity) getActivity()).navigateToTab(Constants.HomeTabs.EVENT_TAB);
+
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

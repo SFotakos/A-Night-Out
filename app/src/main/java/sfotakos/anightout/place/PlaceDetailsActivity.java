@@ -144,8 +144,9 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
         startActivityForResult(newEventIntent, Constants.NEW_EVENT_RESULT_CODE);
     }
 
-    private void navigateToEvent() {
+    private void navigateToEvent(Integer eventId) {
         Intent returnIntent = new Intent();
+        returnIntent.putExtra(Constants.EVENT_ID_EXTRA, eventId);
         setResult(Activity.RESULT_OK, returnIntent);
         finish();
     }
@@ -153,7 +154,9 @@ public class PlaceDetailsActivity extends AppCompatActivity implements EventsDia
     class UpdatedEventReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            navigateToEvent();
+            if (intent.getExtras()!= null) {
+                navigateToEvent(Integer.valueOf(intent.getExtras().getString(Constants.EVENT_ID_EXTRA)));
+            }
         }
     }
 }

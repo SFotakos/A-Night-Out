@@ -73,6 +73,14 @@ public class EventsRvAdapter extends RecyclerView.Adapter<EventsRvAdapter.EventV
         return eventList.size();
     }
 
+    public void openEventById(Integer eventId){
+        for (Event event : eventList) {
+            if (event.getEventId().equals(eventId)) {
+                listener.eventClicked(event);
+            }
+        }
+    }
+
     class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView mEventName;

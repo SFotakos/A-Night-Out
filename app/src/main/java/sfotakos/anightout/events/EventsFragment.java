@@ -90,4 +90,10 @@ public class EventsFragment extends Fragment implements LocalRepository.ILocalRe
     public void onEventListObtained(List<Event> events) {
         setupEventRv(events);
     }
+
+    public void openEventById(Integer eventId){
+        if (mBinding.eventRv.getAdapter() != null) {
+            ((EventsRvAdapter) mBinding.eventRv.getAdapter()).openEventById(eventId);
+        }
+    }
 }

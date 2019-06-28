@@ -6,8 +6,9 @@ public class Constants {
     public final static String PLACE_SERVICE_BROADCAST_ACTION = "placeService_broadcast_action";
     public final static String PLACE_SERVICE_UPDATE_STATUS = "placeService_update_status";
 
-    public final static String PLACE_EXTRA = "placeDetails_placeExtra";
-    public final static String EVENT_EXTRA = "eventDetails_eventExtra";
+    public final static String PLACE_EXTRA = "placeExtra";
+    public final static String EVENT_EXTRA = "eventExtra";
+    public final static String EVENT_ID_EXTRA = "eventIdExtra";
     public final static String SAVED_EVENT_ID_EXTRA = "savedEventId";
 
     public final static String STATE_MAP = "state_map";

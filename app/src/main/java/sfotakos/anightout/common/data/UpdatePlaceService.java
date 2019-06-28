@@ -30,7 +30,8 @@ public class UpdatePlaceService extends IntentService {
                     eventId, place);
 
             Intent broadcastIntent = new Intent(Constants.PLACE_SERVICE_BROADCAST_ACTION)
-                    .putExtra(Constants.PLACE_SERVICE_UPDATE_STATUS, hasUpdated);
+                    .putExtra(Constants.PLACE_SERVICE_UPDATE_STATUS, hasUpdated)
+                    .putExtra(Constants.EVENT_ID_EXTRA, eventId);
             sendBroadcast(broadcastIntent);
         }
     }
