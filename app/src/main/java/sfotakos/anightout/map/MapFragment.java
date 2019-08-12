@@ -37,17 +37,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import sfotakos.anightout.R;
 import sfotakos.anightout.common.Constants;
-import sfotakos.anightout.common.IconAndTextAdapter;
 import sfotakos.anightout.common.google_maps_places_photos_api.MapHelper;
 import sfotakos.anightout.common.google_maps_places_photos_api.MapState;
 import sfotakos.anightout.common.google_maps_places_photos_api.PlaceClusterManager;
 import sfotakos.anightout.common.TutorialUtil;
-import sfotakos.anightout.common.google_maps_places_photos_api.GooglePlacesRequest;
 import sfotakos.anightout.common.google_maps_places_photos_api.model.Place;
 import sfotakos.anightout.databinding.FragmentMapBinding;
 import sfotakos.anightout.filter.FilterAdapter;
